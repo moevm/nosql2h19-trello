@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="style.css" type="text/css"/>
+    <title>
+        Trello Статистика
+    </title>
+</head>
+<body>
+    <nav class="navbar bg-trello">
+        <a class="navbar-brand text-white" href="#">
+            Trello Статистика
+        </a>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="col-8 offset-2">
+            <div class="card bd-trello">
+                <div class="card-body">
+                    <form class="offset-1">
+                        <div class="form-group row">
+                            <label class="col-4 col-form-label">Исходный список:</label>
+                            <div class="col-7">
+                                <select class="custom-select my-1 mr-2">
+                                    <option selected>Все</option>
+                                    <option value="1">Список 1</option>
+                                    <option value="2">Список 2</option>
+                                    <option value="3">Список 3</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-4 col-form-label">Конечный список:</label>
+                            <div class="col-7">
+                                <select class="custom-select my-1 mr-2">
+                                    <option selected>Все</option>
+                                    <option value="1">Список 1</option>
+                                    <option value="2">Список 2</option>
+                                    <option value="3">Список 3</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-4 col-form-label">Ключевые слова:</label>
+                            <div class="col-7">
+                                <textarea class="form-control" style="resize: none;"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-1 col-form-label">C</label>
+                            <div class="col-4">
+                                <input type="date" class="form-control">
+                            </div>
+                            <label class="col-1 col-form-label">по</label>
+                            <div class="col-4">
+                                <input type="date" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-5 offset-3">
+                            <button type="button" class="btn container-fluid text-white bg-trello">Получить статистику</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
