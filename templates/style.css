@@ -1,0 +1,11 @@
+:root {
+  --trello-main-color: #007ac0;
+}
+
+.bg-trello {
+    background-color: var(--trello-main-color);
+}
+
+.bd-trello {
+    border-color: var(--trello-main-color);
+}
