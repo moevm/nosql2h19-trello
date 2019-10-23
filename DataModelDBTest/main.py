@@ -1,43 +1,36 @@
 import pymongo;
-import json; # For json parsing and pretty json printing
-from urllib import request, parse; # For REST-requests
-
+import json;
 # Keys from trello:
 from APIKey import apiKey;
 from tokenKey import tokenKey;
 
-def getBoards(apiKey, tokenKey):
-	url = "https://api.trello.com/1/members/me/boards?fields=name,url&key={}&token={}" \
-		.format(apiKey, tokenKey);
-	print(url);
-	reqAnswer = request.urlopen(url).read().decode('utf-8');
-	data = json.loads(reqAnswer);
-
-	return data;
-
-	# Print received data in readable format:
-	prettyData = json.dumps(data, indent=3);
-	print("Received boards:");
-	print(prettyData);
-
-def getBoardInfo(id, apiKey, tokenKey):
-	url = "https://api.trello.com/1/boards/{}?key={}&token={}" \
-		.format(id, apiKey, tokenKey);
-	data = json.loads(request.urlopen(url).read().decode('utf-8'));
-
-	return data;
-
-	prettyData = json.dumps(data, indent=3);
-	print("Info on board", data['name'], ":");
-	print("", prettyData);
+from TrelloUtility import TrelloUtility
 
 def main():
-	# TODO: make class with those functions that keeps api and token keys
-	#       and remove them from the function args?
-	boards = getBoards(apiKey, tokenKey);
-	boardId = boards[0]['id'];
-	getBoardInfo(boardId, apiKey, tokenKey);
+	# Token key should be taken from user using UI.
+	# Developer's token can be used for development (see https://trello.com/app-key).
+	# API and Token keys must be kept in secret.
+	trello = TrelloUtility(apiKey, tokenKey);
 
+	# boards = trello.getBoards();
+	# boardId = boards[2]['id'];
+	# trello.getBoardInfo(boardId);
+
+	# LOTR board from MMZ's example. Not really an id, but a short-link.
+	boardId = 'tLvDmGT5';
+
+	# lists = trello.getListsOnBoard(boardId);
+	# cards = trello.getCardsOnList(lists[0]['id']);
+	# print(json.dumps(trello.getCardInfo(cards[0]['id']), indent=3));
+	actions = trello.getBoardActions(boardId);
+	filterFunction = lambda x : ((x['type'] == 'updateCard') and ('listAfter' in x['data']));
+	filteredList = list(filter(filterFunction, actions))
+	# print(json.dumps(filteredList, indent=3));
+	for it in filteredList:
+		cardName = it['data']['card']['name'];
+		fromList = it['data']['listBefore'];
+		toList = it['data']['listAfter'];
+		print('Moved card ', cardName, ' from ', fromList, ' to ', toList);
 
 if __name__ == '__main__':
 	main()
