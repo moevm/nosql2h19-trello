@@ -2,6 +2,10 @@ from pymongo import MongoClient
 from TrelloUtility import TrelloUtility
 from bson.objectid import ObjectId;
 from json import dumps;
+from datetime import datetime;
+
+def strToDatetime(str):
+	return datetime.strptime(str, "%Y-%m-%dT%H:%M:%S.%fZ");
 # Gets board id and returns mongoDB with data
 def TrelloToMongoAdapter(boardId, apiKey, tokenKey):
 	trello = TrelloUtility(apiKey, tokenKey);
@@ -23,7 +27,7 @@ def TrelloToMongoAdapter(boardId, apiKey, tokenKey):
 		# For each card
 		for card in trello.getListCards(list['id'], "name,desc,due"):
 			cardId = card['id']
-			print(" ", list['name'], card['name']);
+			print(" ", list['name'], "|", card['name']);
 			# Get creation date:
 			# creationDate = trello.getCardCreationDate(cardId);
 			# print(creationDate);
@@ -54,7 +58,7 @@ def TrelloToMongoAdapter(boardId, apiKey, tokenKey):
 					};
 				moveDoc = {
 					'_id': ObjectId(move['id']),
-					'date': move['date'],
+					'date': strToDatetime(move['date']),
 					'member': memberDoc,
 					'fromList': move['data']['listBefore']['name'],
 					'toList': move['data']['listAfter']['name'],
@@ -89,7 +93,7 @@ def TrelloToMongoAdapter(boardId, apiKey, tokenKey):
 				commentDoc = {
 					'_id': ObjectId(comment['id']),
 					'member': memberDoc,
-					'date': comment['date']
+					'date': strToDatetime(comment['date'])
 				};
 				comments.append(commentDoc);
 
@@ -109,18 +113,21 @@ def TrelloToMongoAdapter(boardId, apiKey, tokenKey):
 					};
 				attachmentDoc = {
 					'_id': ObjectId(attachment['id']),
-					'date': attachment['date'],
+					'date': strToDatetime(attachment['date']),
 					'member': memberDoc
 				};
 
 				attachments.append(attachmentDoc);
-
+			if (card['due'] == None):
+				due = None;
+			else:
+				due = strToDatetime(card['due']);
 			collection.insert_one({
 				'_id': ObjectId(card['id']),
 				'name': card['name'],
 				'description': card['desc'],
 				'created': None,
-				'dueTo': card['due'],
+				'dueTo': due,
 				'currentList': list['name'],
 				'members': members,
 				'moves': moves,
@@ -128,3 +135,9 @@ def TrelloToMongoAdapter(boardId, apiKey, tokenKey):
 				'comments': comments,
 				'attachments': attachments
 			})
+
+def getCollection():
+	client = MongoClient();
+	db = client.db;
+	collection = db.cardsCollection;
+	return collection;
