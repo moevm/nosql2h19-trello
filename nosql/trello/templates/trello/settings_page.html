@@ -1,0 +1,69 @@
+{% extends 'trello/trello_base.html' %}
+
+{% block form %}
+    <form class="" action="{% url 'settings_page_url' %}" method="post">
+        {% csrf_token %}
+        <div class="form-group row">
+            <label class="col-4 col-form-label">Исходный список:</label>
+            <div class="col-7">
+                {{ form.start_list }}
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-4 col-form-label">Конечный список:</label>
+            <div class="col-7">
+                {{ form.final_list }}
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-4 col-form-label">Ключевые слова:</label>
+            <div class="col-7">
+                {{ form.key_words }}
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-4">Метки:</label>
+            <div class="col-7">
+                {{ form.labels }}
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-4 col-form-label">Исполнитель:</label>
+            <div class="col-7">
+                {{ form.executors }}
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-4 col-form-label">Срок выполнения до:</label>
+            <div class="col-4">
+                {{ form.due_date }}
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-2 col-form-label">Период с</label>
+            <div class="col-4">
+                {{ form.from_date }}
+            </div>
+            <label class="col-1 col-form-label">по</label>
+            <div class="col-4">
+                {{ form.to_date }}
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="form-check form-check-inline">
+                {{ form.attachment }}
+                <label class="form-check-label">Учитывать наличие вложений</label>
+            </div>
+            <div class="form-check form-check-inline">
+                {{ form.comments }}
+                <label class="form-check-label">Учитывать наличие комментариев</label>
+            </div>
+        </div>
+        <div class="col-5 offset-3">
+            <button type="submit" class="btn container-fluid text-white" style="background-color:#007ac0">
+                Получить статистику
+            </button>
+        </div>
+
+    </form>
+{% endblock %}

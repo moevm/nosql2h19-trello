@@ -1,0 +1,19 @@
+{% extends 'trello/trello_base.html' %}
+
+{% block form %}
+    <form class="" action="{% url 'start_page_url' %}" method="post">
+        {% csrf_token %}
+
+        <div class="form-group row">
+            <label class="col-3 col-form-label">Ссылка на доску:</label>
+            <div class="col-8">
+                {{ form.link }}
+            </div>
+        </div>
+        <div class="col-5 offset-3">
+            <button type="submit" class="btn container-fluid text-white" style="background-color: #007ac0">
+                Далее
+            </button>
+        </div>
+     </form>
+{% endblock %}

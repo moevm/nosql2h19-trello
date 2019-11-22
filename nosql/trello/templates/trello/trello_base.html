@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container mt-5 mb-5">
+        <div class="col-8 offset-2">
+            <div class="card" style="border-color:#007ac0">
+                <div class="card-body offset-1">
+                    {% block form %}
+
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
