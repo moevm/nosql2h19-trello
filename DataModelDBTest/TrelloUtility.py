@@ -67,6 +67,12 @@ class TrelloUtility:
 
 		return data;
 
+	def getBoardLabels(self, boardId, fields="name,color"):
+		params = "boards/{}/labels".format(boardId);
+		data   = self.sendRequest(params, fields);
+
+		return data;
+
 	## Getters for lists ##
 	def getListInfo(self, listId, fields=""):
 		params = "lists/{}".format(listId);
