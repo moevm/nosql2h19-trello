@@ -25,7 +25,7 @@ def TrelloToMongoAdapter(boardId, apiKey, tokenKey):
 	for list in trello.getBoardLists(boardId):
 		# print(list['name']);
 		# For each card
-		for card in trello.getListCards(list['id'], "name,desc,due"):
+		for card in trello.getListCards(list['id'], "name,desc,due,badges"):
 			cardId = card['id']
 			print(" ", list['name'], "|", card['name']);
 			# Get creation date:
@@ -118,15 +118,15 @@ def TrelloToMongoAdapter(boardId, apiKey, tokenKey):
 				};
 
 				attachments.append(attachmentDoc);
-			if (card['due'] == None):
+			if (card['badges']['due'] == None or card['badges']['dueComplete'] == True):
 				due = None;
 			else:
-				due = strToDatetime(card['due']);
+				due = strToDatetime(card['badges']['due']);
 			collection.insert_one({
 				'_id': ObjectId(card['id']),
 				'name': card['name'],
 				'description': card['desc'],
-				'created': None,
+				'created': ObjectId(card['id']).generation_time,
 				'dueTo': due,
 				'currentList': list['name'],
 				'members': members,
