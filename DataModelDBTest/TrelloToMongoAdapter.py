@@ -118,7 +118,7 @@ def TrelloToMongoAdapter(boardId, apiKey, tokenKey):
 				};
 
 				attachments.append(attachmentDoc);
-			if (card['due'] == None):
+			if (card['due'] == None || card['dueComplete'] == True):
 				due = None;
 			else:
 				due = strToDatetime(card['due']);
@@ -126,7 +126,7 @@ def TrelloToMongoAdapter(boardId, apiKey, tokenKey):
 				'_id': ObjectId(card['id']),
 				'name': card['name'],
 				'description': card['desc'],
-				'created': None,
+				'created': ObjectId(card['id']).generation_time,
 				'dueTo': due,
 				'currentList': list['name'],
 				'members': members,

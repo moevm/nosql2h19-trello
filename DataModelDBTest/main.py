@@ -27,7 +27,7 @@ def testTestBoard():
 	## Uncomment to load data from board
 	## (Very slow process)
 	## Making Mongo database on that board using Trello API requests to get data:
-	# collection = TrelloToMongoAdapter(boardId, apiKey, tokenKey);
+	collection = TrelloToMongoAdapter(boardId, apiKey, tokenKey);
 
 	collection = getCollection();
 
