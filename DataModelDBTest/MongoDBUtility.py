@@ -51,6 +51,18 @@ def getCardsMovedToListStage(toList, Date1 = minDate, Date2 = maxDate):
 ]
 
 
+def getMembers(db):
+	coll = db.members;
+	return list(coll.find());
+
+def getLabels(db):
+	coll = db.labels;
+	return list(coll.find());
+
+def getLists(db):
+	coll = db.lists;
+	return list(coll.find());
+
 ### Paper1
 def getCardsNInListName(collection, list):
 	cardsN = collection.aggregate([

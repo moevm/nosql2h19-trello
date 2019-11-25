@@ -3,6 +3,7 @@ from TrelloUtility import TrelloUtility
 from bson.objectid import ObjectId;
 from json import dumps;
 from datetime import datetime;
+from pprint import pprint;
 
 def strToDatetime(str):
 	return datetime.strptime(str, "%Y-%m-%dT%H:%M:%S.%fZ");
@@ -13,13 +14,30 @@ def TrelloToMongoAdapter(boardId, apiKey, tokenKey):
 
 	db = client.db;
 
+
 	collection = db.cardsCollection;
-
-	# print("Removing collection:");
-	# for t in collection.find():
-	# 	print(t);
-
 	collection.remove();
+
+	# Adding collections for members, lists and ?labels?
+	membersCollection = db.members;
+	membersCollection.remove();
+	members = trello.getBoardMembers(boardId, fields="");
+	for i in members:
+		i['_id'] = i.pop('id');
+	membersCollection.insert_many(members);
+	listsCollection = db.lists;
+	listsCollection.remove();
+	lists = trello.getBoardLists(boardId, fields="name");
+	for i in lists:
+		i['_id'] = i.pop('id');
+	listsCollection.insert_many(lists);
+	labelsCollection = db.labels;
+	labelsCollection.remove();
+	labels = trello.getBoardLabels(boardId, fields="name,color");
+	for i in labels:
+		i['_id'] = i.pop('id');
+	# pprint(labels);
+	labelsCollection.insert_many(labels);
 
 	# For each list
 	for list in trello.getBoardLists(boardId):
@@ -135,6 +153,10 @@ def TrelloToMongoAdapter(boardId, apiKey, tokenKey):
 				'comments': comments,
 				'attachments': attachments
 			})
+
+def getDB():
+	client = MongoClient();
+	return client.db;
 
 def getCollection():
 	client = MongoClient();
