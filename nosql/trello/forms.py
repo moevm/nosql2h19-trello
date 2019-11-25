@@ -1,6 +1,9 @@
 from django import forms
 from .models import Link, Settings
 
+from .TrelloToMongoAdapter import getDB
+from .MongoDBUtility import getLists, getLabels, getMembers
+
 class LinkForm(forms.Form):
     link = forms.URLField()
 
@@ -12,25 +15,41 @@ class LinkForm(forms.Form):
         return new_link
 
 
+class ToLists:
+    def __init__(self):
+        db = getDB()
+        self.Lists = []
+        self.Labels = []
+        self.Members = []
+        tmp = getLists(db)
+        for d in tmp:
+            self.Lists.append((d['name'], d['name']))
+        tmp = getLabels(db)
+        for d in tmp:
+            self.Labels.append(("{color},{name}".format(color=d['color'], name=d['name']),
+                               "{color} ({name})".format(color=d['color'], name=d['name'])))
+        tmp = getMembers(db)
+        for d in tmp:
+            self.Members.append(("{fullName},{username}".format(fullName=d['fullName'], username=d['username']),
+                                "{fullName} ({username})".format(fullName=d['fullName'], username=d['username'])))
+
 class SettingsForm(forms.Form):
-    lists = ((0, 'Список 0'), (1, 'Список 1'), (2, 'Список 2')) # Денис: cюда необходимо поместить названия списков из бд и индивидуальный номер для них, чтобы можно было идентифицировать что выбрал пользователь в форме
-    start_list = forms.TypedMultipleChoiceField(choices=lists)
+    lists = ToLists()
+    start_list = forms.TypedMultipleChoiceField(choices=lists.Lists)
     start_list.widget.attrs.update({'class': 'custom-select my-1 mr-2'})
-    final_list = forms.TypedMultipleChoiceField(choices=lists)
+    final_list = forms.TypedMultipleChoiceField(choices=lists.Lists)
     final_list.widget.attrs.update({'class': 'custom-select my-1 mr-2'})
     key_words = forms.CharField(required=False)
     key_words.widget.attrs.update({'class': 'form-control'})
-    labels_list = ((0, 'Метка 0'), (1, 'Метка 1'), (2, 'Метка 2')) # Денис: cюда необходимо поместить названия меток (с названием цветов?) из бд и индивидуальный номер для них, чтобы можно было идентифицировать что выбрал пользователь в форме
-    labels = forms.TypedMultipleChoiceField(choices=labels_list)
+    labels = forms.TypedMultipleChoiceField(choices=lists.Labels)
     labels.widget.attrs.update({'class': 'custom-select my-1 mr-2'})
-    executors_list = ((0, 'Пользователь 0'), (1, 'Пользователь 1'), (2, 'Пользователь 2')) # Денис: cюда необходимо поместить список пользователей из бд и индивидуальный номер для них, чтобы можно было идентифицировать что выбрал пользователь в форме
-    executors = forms.TypedMultipleChoiceField(choices=executors_list)
+    executors = forms.TypedMultipleChoiceField(choices=lists.Members)
     executors.widget.attrs.update({'class': 'custom-select my-1 mr-2'})
-    due_date = forms.DateField()
+    due_date = forms.DateField(required=False)
     due_date.widget.attrs.update({'class': 'form-control'})
-    from_date = forms.DateField()
+    from_date = forms.DateField(required=False)
     from_date.widget.attrs.update({'class': 'form-control'})
-    to_date = forms.DateField()
+    to_date = forms.DateField(required=False)
     to_date.widget.attrs.update({'class': 'form-control'})
     attachment = forms.BooleanField(required=False)
     attachment.widget.attrs.update({'class': 'form-check-input'})
@@ -39,7 +58,7 @@ class SettingsForm(forms.Form):
 
     def save(self):
         # тут нужно проверить что даты до и после нормальные
-
+        print(self.cleaned_data['start_list'])
         new_settings = Settings(start_list=self.cleaned_data['start_list'],
                                 final_list=self.cleaned_data['final_list'],
                                 key_words=self.cleaned_data['key_words'],

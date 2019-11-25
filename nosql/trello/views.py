@@ -3,8 +3,16 @@ from django.views import View
 from django.http import HttpResponseRedirect, HttpResponse, HttpResponseNotFound
 from django.shortcuts import redirect
 import pymongo
+
+from .APIKey import apiKey
+from .tokenKey import tokenKey
+from .TrelloUtility import TrelloUtility
+
 from .forms import LinkForm, SettingsForm
-# from datetime import datetime
+
+
+
+
 
 from_start_page = False
 
@@ -21,7 +29,16 @@ class LinkGet(View):
 		bound_form = LinkForm(request.POST)
 		if bound_form.is_valid():
 			new_link = bound_form.save()
+
 			# Тут нужно выжать из этой ссылки на доску все данные и сохранить их в БД
+			boardId = 'VoCJJodK'
+			## Uncomment to load data from board
+			## (Very slow process)
+			## Making Mongo database on that board using Trello API requests to get data:
+			# collection = TrelloToMongoAdapter(boardId, apiKey, tokenKey)
+			trello = TrelloUtility(apiKey, tokenKey)
+			elems = trello.getBoardLists(boardId)
+
 			global from_start_page
 			from_start_page = True
 			return redirect('settings_page_url')
@@ -41,21 +58,9 @@ class SettingsGet(View):
 		print("POST!")
 		bound_form = SettingsForm(request.POST)
 		if bound_form.is_valid():
+			print("Valid!")
 			new_settings = bound_form.save()
 			# Тут нужно передать полученные данные в функцию обработчик
+			new_settings.generate_statistic()
 			return redirect('settings_page_url') # страница загрузки PDF
 		return render(request, 'trello/settings_page.html', context={'form': bound_form})
-
-# class TestView(View):
-#
-# 	def get(self, request):
-# 		# x = None
-# 		# myclient = pymongo.MongoClient("mongodb://localhost:27017/")
-# 		# mydb = myclient["mydatabase"]
-# 		# mycol = mydb["customers"]
-# 		# # mycol.delete_many({})
-# 		# mydict = { "name": "Test", "date": str(datetime.now()) }
-# 		# x = mycol.insert_one(mydict)
-# 		# x = mycol.find()
-# 		x = 0
-# 		return HttpResponse(x)
