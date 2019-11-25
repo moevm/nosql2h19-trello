@@ -8,7 +8,7 @@ from APIKey import apiKey;
 from tokenKey import tokenKey;
 from TrelloUtility import TrelloUtility
 
-from TrelloToMongoAdapter import TrelloToMongoAdapter, getCollection;
+from TrelloToMongoAdapter import TrelloToMongoAdapter, getCollection, getDB;
 from MongoDBUtility import *;
 
 def main():
@@ -22,13 +22,20 @@ def testTestBoard():
 	# collection = TrelloToMongoAdapter(boardId, apiKey, tokenKey);
 	trello = TrelloUtility(apiKey, tokenKey);
 	elems = trello.getBoardLists(boardId);
-	pprint(elems);
 
+	db = getDB();
 	collection = getCollection();
 
 	Date3 = datetime(2019,10,25);
 	Date4 = datetime(2019,10,31);
 	member = "Denmey"
+
+	print("Lists:");
+	pprint(getLists(db));
+	print("Labels:");
+	pprint(getLabels(db));
+	print("Members:");
+	pprint(getMembers(db));
 
 	print("#### Paper1 stats ####");
 	print("List name is known from input");
