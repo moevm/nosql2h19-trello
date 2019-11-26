@@ -1,7 +1,7 @@
 from datetime import datetime, MINYEAR, MAXYEAR
 from pprint import pprint
-minDate = datetime(MINYEAR, 1, 1);
-maxDate = datetime(MAXYEAR, 12, 31);
+minDate = datetime(MINYEAR, 1, 1)
+maxDate = datetime(MAXYEAR, 12, 31)
 
 def getCardsCreatedInListStage(list_, Date1 = minDate, Date2 = maxDate):
 	return [
@@ -52,16 +52,16 @@ def getCardsMovedToListStage(toList, Date1 = minDate, Date2 = maxDate):
 
 
 def getMembers(db):
-	coll = db.members;
-	return list(coll.find());
+	coll = db.members
+	return list(coll.find())
 
 def getLabels(db):
-	coll = db.labels;
-	return list(coll.find());
+	coll = db.labels
+	return list(coll.find())
 
 def getLists(db):
-	coll = db.lists;
-	return list(coll.find());
+	coll = db.lists
+	return list(coll.find())
 
 ### Paper1
 def getCardsNInListName(collection, list):
@@ -72,10 +72,10 @@ def getCardsNInListName(collection, list):
 		{ "$count": "count" }
 	])
 	if (cardsN.alive == False):
-		number = 0;
+		number = 0
 	else:
-		number = cardsN.next()['count'];
-	return number;
+		number = cardsN.next()['count']
+	return number
 
 def getLabelsN(collection):
 	labelsN = collection.aggregate([
@@ -85,7 +85,7 @@ def getLabelsN(collection):
 		{ '$unwind': "$labels" },
 		{ "$project": {
 			"labelType": { "$concat":
-				["$labels.color", ",", "$labels.name"]
+				["$labels.color", "(", "$labels.name", ")"]
 			},
 		} },
 		{ '$group': {
@@ -93,30 +93,30 @@ def getLabelsN(collection):
 			'count': {'$sum': 1}
 		}}
 	])
-	return list(labelsN);
+	return list(labelsN)
 
 
 ### Paper2
 def getCardsNCreatedInList(collection, list_,
 		Date1 = minDate, Date2 = maxDate):
-	stages = [];
-	stages.extend(getCardsCreatedInListStage(list_, Date1, Date2));
-	stages.append({"$count": "count"});
+	stages = []
+	stages.extend(getCardsCreatedInListStage(list_, Date1, Date2))
+	stages.append({"$count": "count"})
 
-	cards = collection.aggregate(stages);
+	cards = collection.aggregate(stages)
 
 	if (cards.alive == False):
-		number = 0;
+		number = 0
 	else:
-		number = cards.next()['count'];
+		number = cards.next()['count']
 
-	return number;
+	return number
 
 # Returns cards that were put in list "toList" between "Date1" and "Date2" and were left in that list until Date2
 def getCardsNMovedToList(collection, toList,
 		Date1 = minDate, Date2 = maxDate):
-	stages = [];
-	stages.extend(getCardsMovedToListStage(toList, Date1, Date2));
+	stages = []
+	stages.extend(getCardsMovedToListStage(toList, Date1, Date2))
 	stages.append({"$count": "count"})
 
 	cards = collection.aggregate(stages)
@@ -124,11 +124,11 @@ def getCardsNMovedToList(collection, toList,
 	# print(list(cards))
 	# number;
 	if (cards.alive == False):
-		number = 0;
+		number = 0
 	else:
-		number = cards.next()['count'];
+		number = cards.next()['count']
 
-	return number;
+	return number
 
 def getCardsNMovedOrCreatedInList(collection, toList,
 		Date1 = minDate, Date2 = maxDate):
@@ -185,10 +185,10 @@ def getCardsNMovedOrCreatedInList(collection, toList,
 	# print(list(cards))
 	# number;
 	if (cards.alive == False):
-		number = 0;
+		number = 0
 	else:
-		number = cards.next()['count'];
-	return number;
+		number = cards.next()['count']
+	return number
 
 # Returns max number of cards that were created/moved in list by day
 def getMaxCardsNMovedToList(collection, toList,
@@ -196,16 +196,16 @@ def getMaxCardsNMovedToList(collection, toList,
 
 	result = getCardsNMovedOrCreatedInListGroupedByDay(collection, toList, Date1, Date2);
 
-	max = 0;
+	max = 0
 	for i in result:
 		if (result[i] > max):
-			max = result[i];
+			max = result[i]
 
-	return max;
+	return max
 
 def getCardsNCreatedInListGroupedByDay(collection, list_,
 		Date1 = minDate, Date2 = maxDate):
-	createdStages = [];
+	createdStages = []
 	createdStages.extend(getCardsCreatedInListStage(list_, Date1, Date2))
 	createdStages.extend([
 		{ "$project": {
@@ -225,7 +225,7 @@ def getCardsNCreatedInListGroupedByDay(collection, list_,
 
 def getCardsNMovedToListGroupedByDay(collection, toList,
 		Date1 = minDate, Date2 = maxDate):
-	movedStages = [];
+	movedStages = []
 	movedStages.extend(getCardsMovedToListStage(toList, Date1, Date2))
 	movedStages.extend([
 		{ "$project": {
@@ -240,9 +240,9 @@ def getCardsNMovedToListGroupedByDay(collection, toList,
 			"count": { "$sum": 1 }
 		}}
 	])
-	moved = collection.aggregate(movedStages);
+	moved = collection.aggregate(movedStages)
 
-	return list(moved);
+	return list(moved)
 
 def getCardsNMovedOrCreatedInListGroupedByDay(collection, toList,
 		Date1 = minDate, Date2 = maxDate):
@@ -254,22 +254,22 @@ def getCardsNMovedOrCreatedInListGroupedByDay(collection, toList,
 	# Merge two lists in one and find max
 	result = {};
 	for i in range(len(moved)):
-		result[moved[i]['_id']] = moved[i]['count'];
+		result[moved[i]['_id']] = moved[i]['count']
 	for i in range(len(created)):
 		if (created[i]['_id'] in result):
-			result[created[i]['_id']] +=  created[i]['count'];
+			result[created[i]['_id']] +=  created[i]['count']
 		else:
-			result[created[i]['_id']] =  created[i]['count'];
+			result[created[i]['_id']] =  created[i]['count']
 
 	# pprint(moved);
 	# pprint(created);
 	# pprint(result);
 
-	return result;
+	return result
 
 def getCardsNCreatedInListGroupedByDayOfWeek(collection, list_,
 		Date1 = minDate, Date2 = maxDate):
-	createdStages = [];
+	createdStages = []
 	createdStages.extend(getCardsCreatedInListStage(list_, Date1, Date2))
 	createdStages.extend([
 		{ "$project": {
@@ -280,12 +280,12 @@ def getCardsNCreatedInListGroupedByDayOfWeek(collection, list_,
 			"count": { "$sum": 1 }
 		}}
 	])
-	created = collection.aggregate(createdStages);
+	created = collection.aggregate(createdStages)
 	return list(created);
 
 def getCardsNMovedToListGroupedByDayOfWeek(collection, toList,
 		Date1 = minDate, Date2 = maxDate):
-	movedStages = [];
+	movedStages = []
 	movedStages.extend(getCardsMovedToListStage(toList, Date1, Date2))
 	movedStages.extend([
 		{ "$project": {
@@ -296,9 +296,9 @@ def getCardsNMovedToListGroupedByDayOfWeek(collection, toList,
 			"count": { "$sum": 1 }
 		}}
 	])
-	moved = collection.aggregate(movedStages);
+	moved = collection.aggregate(movedStages)
 
-	return list(moved);
+	return list(moved)
 
 def getCardsNMovedOrCreatedInListGroupedByDayOfWeek(collection, toList,
 		Date1 = minDate, Date2 = maxDate):
@@ -308,20 +308,20 @@ def getCardsNMovedOrCreatedInListGroupedByDayOfWeek(collection, toList,
 	created = getCardsNCreatedInListGroupedByDayOfWeek(collection, toList, Date1, Date2);
 
 	# Merge two lists in one and find max
-	result = {};
+	result = {}
 	for i in range(len(moved)):
-		result[moved[i]['_id']] = moved[i]['count'];
+		result[moved[i]['_id']] = moved[i]['count']
 	for i in range(len(created)):
 		if (created[i]['_id'] in result):
-			result[created[i]['_id']] +=  created[i]['count'];
+			result[created[i]['_id']] +=  created[i]['count']
 		else:
-			result[created[i]['_id']] =  created[i]['count'];
+			result[created[i]['_id']] =  created[i]['count']
 
 	# pprint(moved);
 	# pprint(created);
 	# pprint(result);
 
-	return result;
+	return result
 
 
 ### Paper4
@@ -339,15 +339,15 @@ def getCardsNContainingKeyWord(collection, keyword):
 		{ "$count": "count"}
 	])
 	if (result.alive == False):
-		ret = 0;
+		ret = 0
 	else:
 		ret = result.next()['count']
-	return ret;
+	return ret
 
 # def getOverDueCards
 
 def getOverduedDaysNInList(collection, list_):
-	currtime = datetime.utcnow();
+	currtime = datetime.utcnow()
 	result = collection.aggregate([
 		{"$match": { "$and": [
 			{ "dueTo": {"$ne": None} },
@@ -363,18 +363,18 @@ def getOverduedDaysNInList(collection, list_):
 		}}
 	])
 	if (result.alive == False):
-		result = 0;
+		result = 0
 	else:
 		result = result.next()['result']
-	return result;
+	return result
 
 def getOverduedDaysAvgNInList(collection, list_):
-	days = getOverduedDaysNInList(collection, list_);
-	cards = getCardsNInListName(collection, list_);
+	days = getOverduedDaysNInList(collection, list_)
+	cards = getCardsNInListName(collection, list_)
 	if (cards == 0):
-		return 0;
+		return 0
 	else:
-		return days/cards;
+		return days/cards
 
 
 ### Paper5
@@ -433,10 +433,10 @@ def getTasksFinishedByUserN(collection, fullName, finishList, Date1 = minDate, D
 		# # Возвращаем документ с единственным полем count
 	]);
 	if (result.alive == False):
-		result = 0;
+		result = 0
 	else:
-		result = result.next()['count'];
-	return result;
+		result = result.next()['count']
+	return result
 
 def getTasksFinishedByUserNGroupedByDay(collection, fullName, finishList, Date1 = minDate, Date2 = maxDate):
 	result = collection.aggregate([
@@ -491,9 +491,9 @@ def getTasksFinishedByUserNGroupedByDay(collection, fullName, finishList, Date1 
 		}}
 		# { '$count': 'count'	} # Считаем количество документов и заносим в поле count
 		# # Возвращаем документ с единственным полем count
-	]);
+	])
 
-	return list(result);
+	return list(result)
 
 
 ### Paper6
@@ -513,21 +513,21 @@ def getAttachmentsNInList(collection, listName, Date1 = minDate, Date2 = maxDate
 		}},
 		{ "$unwind": "$attachments"},
 		{ "$count": "count"}
-	]);
+	])
 
 	if (result.alive == False):
-		result = 0;
+		result = 0
 	else:
-		result = result.next()['count'];
-	return result;
+		result = result.next()['count']
+	return result
 
 def getAttachmentsAvgNInList(collection, listName, Date1 = minDate, Date2 = maxDate):
-	attN = getAttachmentsNInList(collection, listName);
-	cardsN = getCardsNInListName(collection, listName);
+	attN = getAttachmentsNInList(collection, listName)
+	cardsN = getCardsNInListName(collection, listName)
 	if (cardsN == 0):
-		return 0;
+		return 0
 	else:
-		return attN/cardsN;
+		return attN/cardsN
 
 
 ### Paper7
@@ -555,10 +555,10 @@ def getAttachmentsNDoneInListByUser(collection, listName, fullName, Date1 = minD
 	]);
 
 	if (result.alive == False):
-		result = 0;
+		result = 0
 	else:
-		result = result.next()['count'];
-	return result;
+		result = result.next()['count']
+	return result
 
 def getCommentsNInList(collection, listName, Date1 = minDate, Date2 = maxDate):
 	result = collection.aggregate([
@@ -576,22 +576,22 @@ def getCommentsNInList(collection, listName, Date1 = minDate, Date2 = maxDate):
 		}},
 		{ "$unwind": "$comments"},
 		{ "$count": "count"}
-	]);
+	])
 
 	if (result.alive == False):
-		result = 0;
+		result = 0
 	else:
-		result = result.next()['count'];
-	return result;
+		result = result.next()['count']
+	return result
 
 def getCommentsAvgNInList(collection, listName, Date1 = minDate, Date2 = maxDate):
-	commN = getCommentsNInList(collection, listName);
-	cardsN = getCardsNInListName(collection, listName);
+	commN = getCommentsNInList(collection, listName)
+	cardsN = getCardsNInListName(collection, listName)
 
 	if (cardsN == 0):
-		return 0;
+		return 0
 	else:
-		return commN/cardsN;
+		return commN/cardsN
 
 def getCommentsMaxNInList(collection, listName, Date1 = minDate, Date2 = maxDate):
 	result = collection.aggregate([
@@ -617,14 +617,14 @@ def getCommentsMaxNInList(collection, listName, Date1 = minDate, Date2 = maxDate
 		{ "$project": {
 			"max": { "$max": "$comments" }
 		}}
-	]);
+	])
 	# pprint(list(result));
 
 	if (result.alive == False):
-		result = 0;
+		result = 0
 	else:
-		result = result.next()['max'];
-	return result;
+		result = result.next()['max']
+	return result
 
 # Comments number from member with name "fullName"
 def getCommentsNumberFromUserInList(collection, fullName, listName, Date1 = minDate, Date2 = maxDate):
@@ -652,10 +652,10 @@ def getCommentsNumberFromUserInList(collection, fullName, listName, Date1 = minD
 		}},
 	])
 	if (commentsNumber.alive == False):
-		commentsNumber = 0;
+		commentsNumber = 0
 	else:
-		commentsNumber = commentsNumber.next()['number'];
-	return commentsNumber;
+		commentsNumber = commentsNumber.next()['number']
+	return commentsNumber
 
 
 
@@ -688,6 +688,6 @@ def getCommentsNumberFromUserGroupedByDate(collection, fullName, Date1, Date2):
 			"count": { "$sum": 1 }
 		}},
 	])
-	return commentsNumber;
+	return commentsNumber
 
 ### Auxiliary

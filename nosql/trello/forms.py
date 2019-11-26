@@ -4,13 +4,12 @@ from .models import Link, Settings
 from .TrelloToMongoAdapter import getDB
 from .MongoDBUtility import getLists, getLabels, getMembers
 
+
 class LinkForm(forms.Form):
     link = forms.URLField()
-
     link.widget.attrs.update({'class': 'form-control'})
 
     def save(self):
-        # Тут наверное неплохо было бы проверить ссылочку
         new_link = Link(link=self.cleaned_data['link'])
         return new_link
 
@@ -45,28 +44,20 @@ class SettingsForm(forms.Form):
     labels.widget.attrs.update({'class': 'custom-select my-1 mr-2'})
     executors = forms.TypedMultipleChoiceField(choices=lists.Members)
     executors.widget.attrs.update({'class': 'custom-select my-1 mr-2'})
-    due_date = forms.DateField(required=False)
-    due_date.widget.attrs.update({'class': 'form-control'})
-    from_date = forms.DateField(required=False)
-    from_date.widget.attrs.update({'class': 'form-control'})
-    to_date = forms.DateField(required=False)
-    to_date.widget.attrs.update({'class': 'form-control'})
     attachment = forms.BooleanField(required=False)
     attachment.widget.attrs.update({'class': 'form-check-input'})
     comments = forms.BooleanField(required=False)
     comments.widget.attrs.update({'class': 'form-check-input'})
 
-    def save(self):
-        # тут нужно проверить что даты до и после нормальные
-        print(self.cleaned_data['start_list'])
+    def save(self, due_date, from_date, to_date):
         new_settings = Settings(start_list=self.cleaned_data['start_list'],
                                 final_list=self.cleaned_data['final_list'],
-                                key_words=self.cleaned_data['key_words'],
+                                key_words=self.cleaned_data['key_words'].split(' '),
                                 labels=self.cleaned_data['labels'],
                                 executors=self.cleaned_data['executors'],
-                                due_date=self.cleaned_data['due_date'],
-                                from_date=self.cleaned_data['from_date'],
-                                to_date=self.cleaned_data['to_date'],
+                                due_date=due_date,
+                                from_date=from_date,
+                                to_date=to_date,
                                 attachment=self.cleaned_data['attachment'],
                                 comments=self.cleaned_data['comments'])
         return new_settings

@@ -1,0 +1,14 @@
+{% extends 'trello/trello_base.html' %}
+
+{% block form %}
+    <form class="" action="{% url 'download_page_url' %}" method="post">
+        {% csrf_token %}
+
+        <h3 class="offset-2 col-7">Ваша статистика готова!</h3>
+        <div class="col-5 offset-3">
+            <button type="submit" class="btn container-fluid text-white" style="background-color: #007ac0">
+                Скачать статистику
+            </button>
+        </div>
+     </form>
+{% endblock %}
