@@ -23,6 +23,11 @@ def testTestBoard():
 	trello = TrelloUtility(apiKey, tokenKey);
 	elems = trello.getBoardLists(boardId);
 
+	print("Check correct board:");
+	print(trello.checkBoard(boardId));
+	print("Check incorrect board:");
+	print(trello.checkBoard("VoCJJod"));
+
 	db = getDB();
 	collection = getCollection();
 
