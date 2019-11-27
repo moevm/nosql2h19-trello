@@ -44,6 +44,7 @@ class Settings:
 
     def add_image_in_pdf(self, pdf, image_path='statistic.png'):
         pdf.ln(1)
+        pdf.cell(20)
         pdf.image(image_path, x=30, w=150)
         pdf.ln(1)
         return
