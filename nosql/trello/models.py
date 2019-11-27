@@ -14,9 +14,12 @@ from .TrelloToMongoAdapter import TrelloToMongoAdapter, getCollection, getDB
 from .MongoDBUtility import *
 
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MultipleLocator, FormatStrFormatter, AutoMinorLocator
 import numpy as np
 import re
 from fpdf import FPDF
+import os
+import glob
 
 
 class Settings:
@@ -33,10 +36,10 @@ class Settings:
         self.comments = comments
 
 
-    def write_in_pdf(self, pdf, txt='', font_size=8, line_width=8, tab=True):
+    def write_in_pdf(self, pdf, txt='', font_size=9, line_width=9, tab=True):
         pdf.set_font('DejaVu', '', font_size)
         if tab:
-            pdf.write(font_size, "           " + txt)
+            pdf.write(font_size, "      " + txt)
         else:
             pdf.write(font_size, txt)
         pdf.ln(line_width)
@@ -54,6 +57,9 @@ class Settings:
         statistic_path = './trello/statistic/'
         days_of_week = {1: "Вс", 2: "Пн", 3: "Вт", 4: "Ср", 5: "Чт", 6: "Пт", 7: "Сб"}
 
+        for file in glob.glob(statistic_path+'*.pdf'): # чистка pdf
+            os.remove(file)
+
 
         pdf = FPDF(orientation='P', unit='mm', format='A4')
         pdf.add_font('DejaVu', '', 'DejaVuSansCondensed.ttf', uni=True)
@@ -69,10 +75,10 @@ class Settings:
             self.write_in_pdf(pdf=pdf, txt="Текущее количество карточек в списке: {}".format(getCardsNInListName(collection, list_name)))
 
             self.write_in_pdf(pdf=pdf, txt="Статистика по меткам", font_size=12, tab=False)
-            labels_on_doard = getLabelsN(collection)
+            labels_on_board = getLabelsN(collection)
             names = []
             values = []
-            for d in labels_on_doard:
+            for d in labels_on_board:
                 names.append(d['_id'])
                 values.append(d['count'])
             # поработать над цветом и подписями, подписи к осям
@@ -88,20 +94,20 @@ class Settings:
 
             self.write_in_pdf(pdf=pdf, txt="Статистика добавлений/перемещений карточек в список", font_size=12, tab=False)
             self.write_in_pdf(pdf=pdf, txt="Общее количество созданных карточек в списке за период с {from_date} по {to_date}: {N}".format(
-                                  from_date=self.from_date.strftime("%d:%m:%Y"), to_date=self.to_date.strftime("%d.%m.%y"),
+                                  from_date=self.from_date.strftime("%d.%m.%y"), to_date=self.to_date.strftime("%d.%m.%y"),
                                   N=getCardsNCreatedInList(collection, list_name, self.from_date, self.to_date)))
             self.write_in_pdf(pdf=pdf,txt="Общее количество добавленных карточек в списке за период с {from_date} по {to_date}: {N}".format(
-                                  from_date=self.from_date.strftime("%d:%m:%Y"), to_date=self.to_date.strftime("%d.%m.%y"),
+                                  from_date=self.from_date.strftime("%d.%m.%y"), to_date=self.to_date.strftime("%d.%m.%y"),
                                   N=getCardsNMovedToList(collection, list_name, self.from_date, self.to_date)))
             num_moved_create = getCardsNMovedOrCreatedInList(collection, list_name, self.from_date, self.to_date)
             self.write_in_pdf(pdf=pdf,txt="Общее количество созданных/добавленных карточек в списке за период с {from_date} по {to_date}: {N}".format(
-                                  from_date=self.from_date.strftime("%d:%m:%Y"), to_date=self.to_date.strftime("%d.%m.%y"),
+                                  from_date=self.from_date.strftime("%d.%m.%y"), to_date=self.to_date.strftime("%d.%m.%y"),
                                   N=num_moved_create))
-            self.write_in_pdf(pdf=pdf, txt="Среднее количество созданных/добавленных карточек в списке за период с {from_date} по {to_date} в неделю: {N}".format(
-                                  from_date=self.from_date.strftime("%d:%m:%Y"), to_date=self.to_date.strftime("%d.%m.%y"),
+            self.write_in_pdf(pdf=pdf, txt="Среднее количество созданных/добавленных карточек за период с {from_date} по {to_date} в неделю: {N}".format(
+                                  from_date=self.from_date.strftime("%d.%m.%y"), to_date=self.to_date.strftime("%d.%m.%y"),
                                   N=round(num_moved_create/((self.to_date-self.from_date).days)/7, 3)))
-            self.write_in_pdf(pdf=pdf, txt="Среднее количество созданных/добавленных карточек в списке за период с {from_date} по {to_date} в месяц: {N}".format(
-                                  from_date=self.from_date.strftime("%d:%m:%Y"), to_date=self.to_date.strftime("%d.%m.%y"),
+            self.write_in_pdf(pdf=pdf, txt="Среднее количество созданных/добавленных карточек за период с {from_date} по {to_date} в месяц: {N}".format(
+                                  from_date=self.from_date.strftime("%d.%m.%y"), to_date=self.to_date.strftime("%d.%m.%y"),
                                   N=round(num_moved_create/((self.to_date-self.from_date).days)/30, 3)))
             self.write_in_pdf(pdf=pdf, txt="Максимальное количество созданных/добавленных карточек за день: {}".format(
                 getMaxCardsNMovedToList(collection, list_name)))
@@ -112,7 +118,7 @@ class Settings:
             names = []
             values = []
             while (curr_date < self.to_date):
-                curr_date_to_string = curr_date.strftime("%d-%m-%Y")
+                curr_date_to_string = curr_date.strftime("%d-%m-%y")
                 names.append(curr_date_to_string)
                 if curr_date_to_string in date_ncards.keys():
                     values.append(date_ncards[curr_date_to_string])
@@ -122,6 +128,7 @@ class Settings:
             # поработать над надписями, которые слипаются внизу, подписи к осям
             fig, ax = plt.subplots()
             ax.plot(names, values)
+            ax.xaxis.set_major_locator(MultipleLocator(round(len(names)/5)))
             ax.set_title('График зависимости появления новых карточек в списке от даты')
             ax.set_xlabel('Дата')
             ax.set_ylabel('Количество карточек, шт')
@@ -147,21 +154,22 @@ class Settings:
             plt.savefig(statistic_path+'Statistic3.png')
             self.add_image_in_pdf(pdf=pdf, image_path=statistic_path + 'Statistic3.png')
 
-            self.write_in_pdf(pdf=pdf, txt="Статистика по ключевым словам", font_size=12, tab=False)
             # ключевые слова ищутся по всей доске или в текущем списке?
-            names = []
-            values = []
-            for keyword in self.key_words:
-                names.append(keyword)
-                values.append(getCardsNContainingKeyWord(collection, keyword))
-            # цвет и подписи к осям
-            fig, ax = plt.subplots()
-            ax.bar(names, values)
-            ax.set_title('Встречаемость ключевых слов в названии/описании карточек списка')
-            ax.set_xlabel('Ключевое слово')
-            ax.set_ylabel('Количество карточек, шт')
-            plt.savefig(statistic_path+'Statistic4.png')
-            self.add_image_in_pdf(pdf=pdf, image_path=statistic_path + 'Statistic4.png')
+            if(len(self.key_words) > 0):
+                self.write_in_pdf(pdf=pdf, txt="Статистика по ключевым словам", font_size=12, tab=False)
+                names = []
+                values = []
+                for keyword in self.key_words:
+                    names.append(keyword)
+                    values.append(getCardsNContainingKeyWord(collection, keyword))
+                # цвет и подписи к осям
+                fig, ax = plt.subplots()
+                ax.bar(names, values)
+                ax.set_title('Встречаемость ключевых слов в названии/описании карточек списка')
+                ax.set_xlabel('Ключевое слово')
+                ax.set_ylabel('Количество карточек, шт')
+                plt.savefig(statistic_path+'Statistic4.png')
+                self.add_image_in_pdf(pdf=pdf, image_path=statistic_path + 'Statistic4.png')
 
             self.write_in_pdf(pdf=pdf, txt="Cтатистика по срокам выполнения", font_size=12, tab=False)
             self.write_in_pdf(pdf=pdf, txt="Суммарное количество просроченных дней по всем карточкам списка: {}".format(
@@ -177,7 +185,7 @@ class Settings:
             for member in self.executors:
                 self.write_in_pdf(pdf=pdf, txt="Исполнитель: {}".format(member))
                 self.write_in_pdf(pdf=pdf, txt="Количество выполненных задач за период с {from_date} по {to_date}: {N}".format(
-                    from_date=self.from_date.strftime("%d:%m:%Y"), to_date=self.to_date.strftime("%d.%m.%y"),
+                    from_date=self.from_date.strftime("%d.%m.%y"), to_date=self.to_date.strftime("%d.%m.%y"),
                     N=getTasksFinishedByUserN(collection, member, list_name, self.from_date, self.to_date)))
 
                 # не хватает среднего за неделю и месяц
@@ -190,7 +198,7 @@ class Settings:
                 names = []
                 values = []
                 while (curr_date != self.to_date):
-                    curr_date_to_string = curr_date.strftime("%d-%m-%Y")
+                    curr_date_to_string = curr_date.strftime("%d-%m-%y")
                     names.append(curr_date_to_string)
                     if curr_date_to_string in tmp.keys():
                         values.append(tmp[curr_date_to_string])
@@ -202,7 +210,8 @@ class Settings:
                 # поработать над надписями, которые слипаются внизу, подписи к осям
                 fig, ax = plt.subplots()
                 ax.plot(names, values)
-                ax.set_title('График зависимости количества выполненных исполнителем задач от даты')
+                ax.xaxis.set_major_locator(MultipleLocator(round(len(names) / 5)))
+                ax.set_title('График зависимости количества выполненных исполнителем\n задач от даты')
                 ax.set_xlabel('Дата')
                 ax.set_ylabel('Количество выполненных задач, шт')
                 plt.savefig(statistic_path+'Statistic5.png')
@@ -259,5 +268,10 @@ class Settings:
                 ax.set_ylabel('Количество комментариев, шт')
                 plt.savefig(statistic_path+'Statistic7.png')
                 self.add_image_in_pdf(pdf=pdf, image_path=statistic_path+'Statistic7.png')
+
+                for file in glob.glob(statistic_path + '*.png'):  # чистка картиночек
+                    os.remove(file)
+
+
 
         pdf.output(statistic_path+"Statistic.pdf", 'F') # сохранение PDF файла

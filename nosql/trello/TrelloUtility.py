@@ -9,10 +9,18 @@ class TrelloUtility:
 		self.api = api;
 		self.token = token;
 
+	def checkBoard(self, boardId):
+		try:
+			data = self.sendRequest("boards/{}".format(boardId), "id");
+			return True;
+		except error.HTTPError:
+			return False;
+		print(data);
+
 	# Auxiliary function for sending requests to Trello.
 	# Returns received data
 	# Add wrong ids/keys exceptions?
-	def sendRequest(self, params, fields="", filter=""):
+	def sendRequest(self, params, fields="", filter="", batch=""):
 		keyTokenStr = "key={}&token={}" \
 			.format(self.api, self.token)
 
@@ -23,7 +31,7 @@ class TrelloUtility:
 		if (filter != ""):
 			filterStr = "&filter=" + filter;
 
-		url = "https://api.trello.com/1/" + params + "?" + keyTokenStr + fieldsStr + filterStr;
+		url = "https://api.trello.com/1/" + params + "?" + batch + "&" + keyTokenStr + fieldsStr + filterStr;
 		# url = urllib.quote(url);
 		# print(url);
 		data = json.loads(request.urlopen(url).read().decode('utf-8'));
@@ -93,6 +101,45 @@ class TrelloUtility:
 		data = self.sendRequest(params, fields);
 
 		return data;
+
+	def getCardSubInfo(self, cardId):
+		# trello.getCardMembers(cardId);
+		# trello.getCardMoves(cardId);
+		# trello.getCardLabels(cardId);
+		# trello.getCardComments(cardId, "type,memberCreator,date");
+		# trello.getCardAttachments(cardId);
+		# 	trello.getMember(attachment['idMember'], "fullName,username");
+		batch = "urls=\
+/cards/{cardId}/members/,\
+/cards/{cardId}/actions/,\
+/cards/{cardId}/labels/,\
+/cards/{cardId}/attachments/"\
+		.format(cardId=cardId);
+		data = self.sendRequest("batch", batch=batch);
+		# for i in data:
+		# 	print(i);
+		if ('200' in data[0]):
+			members = data[0]['200'];
+		# print("Members:", members);
+		if ('200' in data[1]):
+			actions = data[1]['200'];
+		# print("Actions:", actions);
+		if ('200' in data[2]):
+			labels = data[2]['200'];
+		# print("Labels:", labels);
+		if ('200' in data[3]):
+			attachments = data[3]['200'];
+		# print("Attachments:", attachments);
+		# filter moves
+		filterFunction = lambda x : ((x['type'] == 'updateCard') and ('listAfter' in x['data']));
+		moves = list(filter(filterFunction, actions));
+
+		# filter comments
+		filterFunction = lambda x : ((x['type'] == 'commentCard'));
+		comments = list(filter(filterFunction, actions));
+
+		return [members, moves, labels, comments, attachments];
+
 
 	def getCardLabels(self, cardId, fields=""):
 		params = "cards/{}/labels".format(cardId);

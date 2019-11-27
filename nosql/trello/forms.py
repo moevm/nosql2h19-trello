@@ -47,7 +47,7 @@ class ToLists:
                                "{color} ({name})".format(color=d['color'], name=d['name'])))
         tmp = getMembers(db)
         for d in tmp:
-            self.Members.append(("{fullName},{username}".format(fullName=d['fullName'], username=d['username']),
+            self.Members.append(("{fullName} ({username})".format(fullName=d['fullName'], username=d['username']),
                                 "{fullName} ({username})".format(fullName=d['fullName'], username=d['username'])))
 
 class SettingsForm(forms.Form):
@@ -77,7 +77,7 @@ class SettingsForm(forms.Form):
         self.due_date = due_date
         new_settings = Settings(start_list=self.cleaned_data['start_list'],
                                 final_list=self.cleaned_data['final_list'],
-                                key_words=self.cleaned_data['key_words'].split(' '),
+                                key_words=self.cleaned_data['key_words'].split(),
                                 labels=self.cleaned_data['labels'],
                                 executors=self.cleaned_data['executors'],
                                 due_date=due_date,
