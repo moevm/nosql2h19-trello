@@ -1,6 +1,5 @@
 from django.db import models
 
-# from pymongo import MongoClient;
 from datetime import datetime, timezone, timedelta, date
 from pprint import pprint # Pretty printing
 import json
@@ -9,7 +8,6 @@ import json
 from .APIKey import apiKey
 from .tokenKey import tokenKey
 from .TrelloUtility import TrelloUtility
-
 from .TrelloToMongoAdapter import TrelloToMongoAdapter, getCollection, getDB
 from .MongoDBUtility import *
 
@@ -118,7 +116,7 @@ class Settings:
             names = []
             values = []
             while (curr_date < self.to_date):
-                curr_date_to_string = curr_date.strftime("%d-%m-%y")
+                curr_date_to_string = curr_date.strftime("%d-%m-%Y")
                 names.append(curr_date_to_string)
                 if curr_date_to_string in date_ncards.keys():
                     values.append(date_ncards[curr_date_to_string])
@@ -148,7 +146,7 @@ class Settings:
             # цвет и подписи осей
             fig, ax = plt.subplots()
             ax.bar(names, values)
-            ax.set_title('График зависимости появления новых карточек в списке от дня недели')
+            ax.set_title('График зависимости появления новых карточек в списке от дня \n недели')
             ax.set_xlabel('День недели')
             ax.set_ylabel('Количество карточек, шт')
             plt.savefig(statistic_path+'Statistic3.png')
@@ -198,7 +196,7 @@ class Settings:
                 names = []
                 values = []
                 while (curr_date != self.to_date):
-                    curr_date_to_string = curr_date.strftime("%d-%m-%y")
+                    curr_date_to_string = curr_date.strftime("%d-%m-%Y")
                     names.append(curr_date_to_string)
                     if curr_date_to_string in tmp.keys():
                         values.append(tmp[curr_date_to_string])

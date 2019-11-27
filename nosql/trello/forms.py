@@ -47,7 +47,7 @@ class ToLists:
                                "{color} ({name})".format(color=d['color'], name=d['name'])))
         tmp = getMembers(db)
         for d in tmp:
-            self.Members.append(("{fullName} ({username})".format(fullName=d['fullName'], username=d['username']),
+            self.Members.append(("{fullName}".format(fullName=d['fullName']),
                                 "{fullName} ({username})".format(fullName=d['fullName'], username=d['username'])))
 
 class SettingsForm(forms.Form):
