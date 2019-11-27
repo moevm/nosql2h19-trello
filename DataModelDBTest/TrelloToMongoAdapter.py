@@ -21,10 +21,10 @@ def TrelloToMongoAdapter(boardId, apiKey, tokenKey):
 	# Adding collections for members, lists and ?labels?
 	membersCollection = db.members;
 	membersCollection.remove();
-	members = trello.getBoardMembers(boardId, fields="");
-	for i in members:
+	boardMembers = trello.getBoardMembers(boardId, fields="");
+	for i in boardMembers:
 		i['_id'] = i.pop('id');
-	membersCollection.insert_many(members);
+	membersCollection.insert_many(boardMembers);
 	listsCollection = db.lists;
 	listsCollection.remove();
 	lists = trello.getBoardLists(boardId, fields="name");
@@ -50,23 +50,21 @@ def TrelloToMongoAdapter(boardId, apiKey, tokenKey):
 			# creationDate = trello.getCardCreationDate(cardId);
 			# print(creationDate);
 			# break;
-
+			print("   Get card info:");
+			[cardMembers, cardMoves, cardLabels, cardComments, cardAttachments] = trello.getCardSubInfo(cardId);
 			# For each member
 			print("   Members:");
 			members = [];
-			for member in trello.getCardMembers(cardId): # √
-				# print("    ", member);
-				memberDoc = {
+			for member in cardMembers:
+				members.append({
 					'_id': ObjectId(member['id']),
 					'fullName': member['fullName'],
 					'username': member['username']
-				}
-				members.append(memberDoc)
-
+				})
 			# For each move
 			moves = [];
 			print("   Moves:");
-			for move in trello.getCardMoves(cardId): # √
+			for move in cardMoves:
 				memberDoc = None; # Some comments don't have authors? Deleted accounts?
 				if ('memberCreator' in move):
 					memberDoc = {
@@ -74,33 +72,28 @@ def TrelloToMongoAdapter(boardId, apiKey, tokenKey):
 						'fullName': move['memberCreator']['fullName'],
 						'username': move['memberCreator']['username']
 					};
-				moveDoc = {
+				moves.append({
 					'_id': ObjectId(move['id']),
 					'date': strToDatetime(move['date']),
 					'member': memberDoc,
 					'fromList': move['data']['listBefore']['name'],
 					'toList': move['data']['listAfter']['name'],
-				};
-				# print("    ", move);
-				moves.append(moveDoc);
+				});
 
 			# For each label
 			print("   Labels:");
 			labels = [];
-			for label in trello.getCardLabels(cardId): # √
-				# print("    ", label);
-				labelDoc = {
+			for label in cardLabels:
+				labels.append({
 					'_id': ObjectId(label['id']),
 					'name': label['name'],
 					'color': label['color']
-				};
-				labels.append(labelDoc);
+				});
 
 			# For each comment
 			print("   Comments:");
 			comments = [];
-			for comment in trello.getCardComments(cardId, "type,memberCreator,date"): # √
-				# print("    ", comment);
+			for comment in cardComments:
 				memberDoc = None; # Some comments don't have authors? Deleted accounts?
 				if ('memberCreator' in comment):
 					memberDoc = {
@@ -108,38 +101,34 @@ def TrelloToMongoAdapter(boardId, apiKey, tokenKey):
 						'fullName': comment['memberCreator']['fullName'],
 						'username': comment['memberCreator']['username']
 					};
-				commentDoc = {
+				comments.append({
 					'_id': ObjectId(comment['id']),
 					'member': memberDoc,
 					'date': strToDatetime(comment['date'])
-				};
-				comments.append(commentDoc);
-
+				});
+			# print(comments);
 			# For each attachment
 			print("   Attachments:");
 			attachments = [];
-			for attachment in trello.getCardAttachments(cardId):
-				# print("    ", attachment);
-				member = trello.getMember(attachment['idMember'], "fullName,username");
-				# print("    attMember:", member)
+			for attachment in cardAttachments:
+				# member = trello.getMember(attachment['idMember'], "fullName,username");
 				memberDoc = None;
-				if (member != None):
-					memberDoc = {
-						'_id': ObjectId(member['id']),
-						'fullName': member['fullName'],
-						'username': member['username']
-					};
-				attachmentDoc = {
+				for i in boardMembers:
+					if i['_id'] == attachment['idMember']:
+						memberDoc = i;
+						break;
+				attachments.append({
 					'_id': ObjectId(attachment['id']),
 					'date': strToDatetime(attachment['date']),
 					'member': memberDoc
-				};
+				});
+			# print(attachments);
 
-				attachments.append(attachmentDoc);
 			if (card['badges']['due'] == None or card['badges']['dueComplete'] == True):
 				due = None;
 			else:
 				due = strToDatetime(card['badges']['due']);
+
 			collection.insert_one({
 				'_id': ObjectId(card['id']),
 				'name': card['name'],
