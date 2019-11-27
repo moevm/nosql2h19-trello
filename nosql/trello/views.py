@@ -9,44 +9,58 @@ import mimetypes
 import os
 
 from .APIKey import apiKey
-from .tokenKey import tokenKey
 from .TrelloUtility import TrelloUtility
 
-from .forms import LinkForm, SettingsForm
+from .forms import SettingsForm, BoardForm
 
 
+board = None # название доски и ID
+tokenKey = ""
 
-from_start_page = False
-board_link = None
-
-class LinkGet(View):
+class KeyGet(View):
 	def get(self, request):
-		global from_start_page
-		from_start_page = False
-		form = LinkForm()
-		return render(request, 'trello/start_page.html', context={'form': form})
+		return render(request, 'trello/start_page.html', context={})
 
 	def post(self, request):
-		bound_form = LinkForm(request.POST)
-		if bound_form.is_valid():
-			global board_link
-			board_link = bound_form.save()
+		return redirect('https://trello.com/1/authorize?callback_method=fragment&return_url={return_url}&expiration=1day&name=TrelloStatistic&scope=read&response_type=token&key={YourAPIKey}'.format(
+				return_url=request.build_absolute_uri()+'next', YourAPIKey=apiKey))
 
-			global from_start_page
-			from_start_page = True
-			return redirect('https://trello.com/1/authorize?callback_method=fragment&return_url={return_url}&expiration=1day&name=TrelloStatistic&scope=read&response_type=token&key={YourAPIKey}'.format(
-				return_url=request.build_absolute_uri()+'settings', YourAPIKey=apiKey))
-		return render(request, 'trello/start_page.html', context={'form': bound_form})
+
+class Next(View):
+	def get(self, request):
+		return render(request, 'trello/next_page.html', context={})
+
+	def post(self, request):
+		if(request.POST['token'] != ''):
+			print(request.POST['token'])
+			global tokenKey
+			tokenKey = request.POST['token']
+			return redirect('boards_page_url')
+		else:
+			return redirect('start_page_url')
+
+
+class BoardGet(View):
+	def get(self, request):
+		if tokenKey:
+			form = BoardForm()
+			return render(request, 'trello/boards_page.html', context={'form': form})
+		else:
+			return HttpResponseNotFound()
+
+	def post(self, request):
+		bound_form = BoardForm(request.POST)
+		if bound_form.is_valid():
+			global board
+			board = bound_form.save()
+			return redirect('settings_page_url')
+		return render(request, 'trello/boards_page.html', context={'form': bound_form})
 
 
 class SettingsGet(View):
 	def get(self, request):
-		print("get")
-		if from_start_page:
-			boardId = 'VoCJJodK' # board_link.boardID
-			## Uncomment to load data from board
-			## (Very slow process)
-			## Making Mongo database on that board using Trello API requests to get data:
+		if apiKey:
+			boardId = 'VoCJJodK' # взять из глобальной переменной
 			# collection = TrelloToMongoAdapter(board_link.boardID, apiKey, tokenKey)
 			trello = TrelloUtility(apiKey, tokenKey)
 			elems = trello.getBoardLists(boardId)

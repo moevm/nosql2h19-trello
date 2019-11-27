@@ -1,17 +1,18 @@
 from django import forms
-from .models import Link, Settings
+from .models import Settings
+from django.core.exceptions import ValidationError
 
 from .TrelloToMongoAdapter import getDB
 from .MongoDBUtility import getLists, getLabels, getMembers
 
 
-class LinkForm(forms.Form):
-    link = forms.URLField()
-    link.widget.attrs.update({'class': 'form-control'})
+
+class BoardForm(forms.Form):
+    board = forms.TypedChoiceField(choices=(('Доска 1', 'Доска 1'), ('Доска 2', 'Доска 2'))) # тут надо достать все доски
+    board.widget.attrs.update({'class': 'custom-select my-1 mr-2'})
 
     def save(self):
-        new_link = Link(link=self.cleaned_data['link'])
-        return new_link
+        return self.cleaned_data['board']
 
 
 class ToLists:
@@ -48,8 +49,15 @@ class SettingsForm(forms.Form):
     attachment.widget.attrs.update({'class': 'form-check-input'})
     comments = forms.BooleanField(required=False)
     comments.widget.attrs.update({'class': 'form-check-input'})
+    from_date = None
+    to_date = None
+    due_date = None
+
 
     def save(self, due_date, from_date, to_date):
+        self.from_date = from_date
+        self.to_date = to_date
+        self.due_date = due_date
         new_settings = Settings(start_list=self.cleaned_data['start_list'],
                                 final_list=self.cleaned_data['final_list'],
                                 key_words=self.cleaned_data['key_words'].split(' '),

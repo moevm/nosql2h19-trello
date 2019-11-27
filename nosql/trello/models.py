@@ -19,15 +19,6 @@ import re
 from fpdf import FPDF
 
 
-class Link():
-    def __init__(self, link):
-        # Тут наверное неплохо было бы проверить ссылочку
-        match = re.search(r'https://trello.com/b/(?P<boardID>\w+)/(?P<boardName>\w+)', link)
-        self.boardID = match.group('boardID')
-        self.boardName =match.group('boardName')
-        self.link = link
-
-
 class Settings:
     def __init__(self, start_list, final_list, key_words, labels, executors, due_date, from_date, to_date, attachment, comments):
         self.start_list = start_list
@@ -119,7 +110,7 @@ class Settings:
             curr_date = self.from_date
             names = []
             values = []
-            while (curr_date != self.to_date):
+            while (curr_date < self.to_date):
                 curr_date_to_string = curr_date.strftime("%d-%m-%Y")
                 names.append(curr_date_to_string)
                 if curr_date_to_string in date_ncards.keys():
