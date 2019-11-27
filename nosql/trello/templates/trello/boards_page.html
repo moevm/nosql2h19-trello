@@ -5,10 +5,15 @@
         {% csrf_token %}
 
         <div class="form-group row">
-            <label class="col-3 col-form-label">Выберете доску:</label>
+            <label class="col-3 col-form-label">Ссылка на доску:</label>
             <div class="col-8">
-                {{ form.board }}
+                {{ form.link }}
             </div>
+             {% if form.link.errors %}
+                <div class="alert alert-danger col-11">
+                    {{ form.link.errors }}
+                </div>
+            {% endif %}
         </div>
         <div class="col-5 offset-3">
             <button type="submit" class="btn container-fluid text-white" style="background-color: #007ac0">

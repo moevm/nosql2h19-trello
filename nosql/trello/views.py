@@ -10,15 +10,18 @@ import os
 
 from .APIKey import apiKey
 from .TrelloUtility import TrelloUtility
+from .TrelloToMongoAdapter import TrelloToMongoAdapter
 
 from .forms import SettingsForm, BoardForm
 
 
-board = None # название доски и ID
+board = None # название доски и ID в словаре
 tokenKey = ""
 
 class KeyGet(View):
 	def get(self, request):
+		global tokenKey
+		tokenKey = ""
 		return render(request, 'trello/start_page.html', context={})
 
 	def post(self, request):
@@ -44,6 +47,7 @@ class BoardGet(View):
 	def get(self, request):
 		if tokenKey:
 			form = BoardForm()
+			form.tokenKey = tokenKey
 			return render(request, 'trello/boards_page.html', context={'form': form})
 		else:
 			return HttpResponseNotFound()
@@ -60,8 +64,9 @@ class BoardGet(View):
 class SettingsGet(View):
 	def get(self, request):
 		if apiKey:
-			boardId = 'VoCJJodK' # взять из глобальной переменной
-			# collection = TrelloToMongoAdapter(board_link.boardID, apiKey, tokenKey)
+			# boardId = 'VoCJJodK'
+			boardId =  board['boardID']
+			collection = TrelloToMongoAdapter(boardId, apiKey, tokenKey)
 			trello = TrelloUtility(apiKey, tokenKey)
 			elems = trello.getBoardLists(boardId)
 			form = SettingsForm()
@@ -78,19 +83,21 @@ class SettingsGet(View):
 			from_date = datetime.strptime(request.POST['from_date'], "%Y-%m-%d")
 			to_date = datetime.strptime(request.POST['to_date'], "%Y-%m-%d")
 			new_settings = bound_form.save(due_date=due_date, from_date=from_date, to_date=to_date)
-			new_settings.generate_statistic(board_link.boardName)
+			new_settings.generate_statistic(board['boardName'])
 			return redirect('download_page_url') # страница загрузки PDF
 		return render(request, 'trello/settings_page.html', context={'form': bound_form})
 
 
 class Download(View):
 	def get(self, request):
-		if from_start_page:
+		if apiKey:
 			return render(request, 'trello/download_page.html', context={})
 		else:
 			return HttpResponseNotFound()
 
 	def post(self, request):
+		global tokenKey
+		tokenKey = ""
 		excel_file_name = './trello/statistic/Statistic.pdf'
 		fp = open(excel_file_name, "rb")
 		response = HttpResponse(fp.read())

@@ -1,18 +1,35 @@
 from django import forms
 from .models import Settings
 from django.core.exceptions import ValidationError
+import re
 
 from .TrelloToMongoAdapter import getDB
+from .TrelloUtility import TrelloUtility
 from .MongoDBUtility import getLists, getLabels, getMembers
 
+from .APIKey import apiKey
 
 
 class BoardForm(forms.Form):
-    board = forms.TypedChoiceField(choices=(('Доска 1', 'Доска 1'), ('Доска 2', 'Доска 2'))) # тут надо достать все доски
-    board.widget.attrs.update({'class': 'custom-select my-1 mr-2'})
+    link = forms.URLField()
+    link.widget.attrs.update({'class': 'form-control'})
+    boardID = ""
+    boardName = ""
+    tokenKey = ""
+
+    def clean_link(self):
+        try:
+            match = re.search(r'https://trello.com/b/(?P<boardID>\w+)/(?P<boardName>\w+)', self.cleaned_data['link'])
+            self.boardID = match.group('boardID')
+            self.boardName = match.group('boardName')
+            #data = TrelloUtility(api=apiKey, token=self.tokenKey).sendRequest("boards/{}".format(self.boardID), "id")
+        except Exception as err:
+            print(err)
+            raise ValidationError('Incorrect link!')
+        return self.cleaned_data['link']
 
     def save(self):
-        return self.cleaned_data['board']
+        return {'boardID': self.boardID, 'boardName': self.boardName}
 
 
 class ToLists:

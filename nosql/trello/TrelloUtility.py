@@ -9,13 +9,6 @@ class TrelloUtility:
 		self.api = api;
 		self.token = token;
 
-	def checkBoard(self, boardId):
-		try:
-			data = self.sendRequest("boards/{}".format(boardId), "id");
-			return True;
-		except error.HTTPError:
-			return False;
-
 	# Auxiliary function for sending requests to Trello.
 	# Returns received data
 	# Add wrong ids/keys exceptions?
