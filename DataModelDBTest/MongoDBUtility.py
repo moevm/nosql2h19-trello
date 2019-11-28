@@ -7,7 +7,8 @@ def getCardsCreatedInListStage(list_, Date1 = minDate, Date2 = maxDate):
 	return [
 	{ "$match": {
 		"moves": { "$size": 0 },
-		"currentList": list_
+		"currentList": list_,
+		"created": {'$gte': Date1, '$lt': Date2}
 	}},
 	]
 
@@ -101,10 +102,10 @@ def getCardsNCreatedInList(collection, list_,
 		Date1 = minDate, Date2 = maxDate):
 	stages = [];
 	stages.extend(getCardsCreatedInListStage(list_, Date1, Date2));
-	stages.append({"$count": "count"});
+	# stages.append({"$count": "count"});
 
 	cards = collection.aggregate(stages);
-
+	pprint(list(cards));
 	if (cards.alive == False):
 		number = 0;
 	else:
@@ -135,6 +136,7 @@ def getCardsNMovedOrCreatedInList(collection, toList,
 	cards = collection.aggregate([
 		{ '$project': { # Добавляем поле lastList,
 			'name': '$name',
+			'created': '$created',
 			'currentList': '$currentList',
 			'moves': '$moves',
 			'lastList': {
@@ -150,6 +152,7 @@ def getCardsNMovedOrCreatedInList(collection, toList,
 		}},
 		{ '$project': { # Добавляем поле max,
 			'name': '$name',
+			'created': '$created',
 			'currentList': '$currentList',
 			'moves': '$moves',
 			'lastList': '$lastList',
@@ -157,6 +160,7 @@ def getCardsNMovedOrCreatedInList(collection, toList,
 		}},
 		{ '$project': {
 			'name': '$name',
+			'created': '$created',
 			'currentList': '$currentList',
 			'moves': '$moves',
 			'lastList': {
@@ -175,7 +179,8 @@ def getCardsNMovedOrCreatedInList(collection, toList,
 				{'lastList.toList': toList}, # Карточка перемещалась
 				{ "$and": [ # Была создана в целевом списке и не перемещалась
 					{'currentList': toList },
-					{'moves': {"$size": 0}}
+					{'moves': {"$size": 0}},
+					{ "created": {'$gte': Date1, '$lt': Date2}}
 				]}
 			]
 		}},
@@ -331,8 +336,8 @@ def getCardsNContainingKeyWord(collection, keyword):
 	regex = "/"+keyword+"/"
 	result = collection.aggregate([
 		{ "$project": { "result": { "$or": [
-			{ "$regexMatch": {"input": "$description", "regex": keyword, "options": "i"} },
-			{ "$regexMatch": {"input": "$name", "regex": keyword, "options": "i"} },
+			# { "$regexMatch": {"input": "$description", "regex": keyword, "options": "i"} },
+			# { "$regexMatch": {"input": "$name", "regex": keyword, "options": "i"} },
 			# { "$regexMatch": {"input": "$comments.????", "regex": keyword, "options": "i"} }
 		]}}},
 		{ "$match": { "result": True}},
