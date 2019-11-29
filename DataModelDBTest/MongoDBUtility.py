@@ -98,7 +98,6 @@ def getLabelsN(collection):
 
 # Get number of labels with exact name and color in particular list
 def getLabelNInList(collection, name, color, listName):
-	print(listName);
 	labelN = collection.aggregate([
 		{ "$match": {
 			"currentList": listName,
@@ -120,7 +119,7 @@ def getLabelNInList(collection, name, color, listName):
 			'count': {'$sum': 1}
 		}},
 	])
-	pprint(list(labelN));
+
 	if (labelN.alive == False):
 		result = 0;
 	else:
@@ -141,12 +140,12 @@ def getLabelN(collection, name, color):
 			},
 		}},
 		{ '$unwind': "$labels" },
-		# { '$group': {
-		# 	'_id': None,
-		# 	'count': {'$sum': 1}
-		# }},
+		{ '$group': {
+			'_id': None,
+			'count': {'$sum': 1}
+		}},
 	])
-	pprint(list(labelN));
+
 	if (labelN.alive == False):
 		result = 0;
 	else:
