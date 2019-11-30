@@ -10,12 +10,6 @@
             </div>
         </div>
         <div class="form-group row">
-            <label class="col-4 col-form-label">Конечный список:</label>
-            <div class="col-7">
-                {{ form.final_list }}
-            </div>
-        </div>
-        <div class="form-group row">
             <label class="col-4 col-form-label">Ключевые слова:</label>
             <div class="col-7">
                 {{ form.key_words }}
@@ -48,6 +42,11 @@
             <div class="col-4">
                 <input type="date" class="form-control" name="to_date" required>
             </div>
+            {% if date_error %}
+                <div class="alert alert-danger col-11">
+                    "Некорректный диапазон дат!"
+                </div>
+            {% endif %}
         </div>
         <div class="form-group">
             <div class="form-check form-check-inline">
