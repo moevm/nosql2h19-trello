@@ -96,6 +96,59 @@ def getLabelsN(collection):
 	])
 	return list(labelsN);
 
+# Get number of labels with exact name and color in particular list
+def getLabelNInList(collection, name, color, listName):
+	labelN = collection.aggregate([
+		{ "$match": {
+			"currentList": listName,
+		}},
+		{ "$project": {
+			'labels': {
+				'$filter': {
+					'input': '$labels',
+					'cond': { '$and': [
+						{ '$eq': [ '$$this.name', name] },
+						{ '$eq': [ '$$this.color', color] }
+					]}
+				}
+			},
+		}},
+		{ '$unwind': "$labels" },
+		{
+			'$count': 'count'
+		}},
+	])
+
+	if (labelN.alive == False):
+		result = 0;
+	else:
+		result = labelN.next()['count'];
+	return result;
+
+def getLabelN(collection, name, color):
+	labelN = collection.aggregate([
+		{ "$project": {
+			'labels': {
+				'$filter': {
+					'input': '$labels',
+					'cond': { '$and': [
+						{ '$eq': [ '$$this.name', name] },
+						{ '$eq': [ '$$this.color', color] }
+					]}
+				}
+			},
+		}},
+		{ '$unwind': "$labels" },
+		{
+			'$count': 'count'
+		}},
+	])
+
+	if (labelN.alive == False):
+		result = 0;
+	else:
+		result = labelN.next()['count'];
+	return result;
 
 ### Paper2
 def getCardsNCreatedInList(collection, list_,
@@ -333,14 +386,11 @@ def getCardsNMovedOrCreatedInListGroupedByDayOfWeek(collection, toList,
 # Searches in description and title of all cards, comments aren't kept in DB
 # Case insensitive
 def getCardsNContainingKeyWord(collection, keyword):
-	regex = "/"+keyword+"/"
 	result = collection.aggregate([
-		{ "$project": { "result": { "$or": [
-			# { "$regexMatch": {"input": "$description", "regex": keyword, "options": "i"} },
-			# { "$regexMatch": {"input": "$name", "regex": keyword, "options": "i"} },
-			# { "$regexMatch": {"input": "$comments.????", "regex": keyword, "options": "i"} }
-		]}}},
-		{ "$match": { "result": True}},
+		{"$match": { "$or": [
+			{"description": {"$regex": keyword, "$options": "i"}},
+			{"name": {"$regex": keyword, "$options": "i"}}
+		]}},
 		{ "$count": "count"}
 	])
 	if (result.alive == False):

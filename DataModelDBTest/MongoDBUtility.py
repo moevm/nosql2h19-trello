@@ -114,9 +114,8 @@ def getLabelNInList(collection, name, color, listName):
 			},
 		}},
 		{ '$unwind': "$labels" },
-		{ '$group': {
-			'_id': None,
-			'count': {'$sum': 1}
+		{
+			'$count': 'count'
 		}},
 	])
 
@@ -140,9 +139,8 @@ def getLabelN(collection, name, color):
 			},
 		}},
 		{ '$unwind': "$labels" },
-		{ '$group': {
-			'_id': None,
-			'count': {'$sum': 1}
+		{
+			'$count': 'count'
 		}},
 	])
 
