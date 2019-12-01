@@ -14,6 +14,7 @@ from .TrelloToMongoAdapter import TrelloToMongoAdapter, getDB
 from .MongoDBUtility import getLists, getLabels, getMembers
 
 from .forms import SettingsForm, BoardForm
+from .models import Settings
 
 
 board = None # название доски и ID в словаре
@@ -95,20 +96,25 @@ class SettingsGet(View):
 
 	def post(self, request):
 		bound_form = SettingsForm(request.POST)
-		if bound_form.is_valid():
-			# проверить что даты нормальные
-			due_date = datetime.strptime(request.POST['due_date'], "%Y-%m-%d")
-			from_date = datetime.strptime(request.POST['from_date'], "%Y-%m-%d")
-			to_date = datetime.strptime(request.POST['to_date'], "%Y-%m-%d")
-			global date_error
-			if(to_date<=from_date):
-				date_error = True
-				return redirect('settings_page_url')
-			date_error = False
-			new_settings = bound_form.save(due_date=due_date, from_date=from_date, to_date=to_date)
-			new_settings.generate_statistic(board['boardName'])
-			return redirect('download_page_url') # страница загрузки PDF
-		return render(request, 'trello/settings_page.html', context={'form': bound_form})
+		due_date = datetime.strptime(request.POST['due_date'], "%Y-%m-%d")
+		from_date = datetime.strptime(request.POST['from_date'], "%Y-%m-%d")
+		to_date = datetime.strptime(request.POST['to_date'], "%Y-%m-%d")
+		global date_error
+		if(to_date<=from_date):
+			date_error = True
+			return render(request, 'trello/settings_page.html', context={'form': bound_form, 'date_error': date_error})
+		date_error = False
+		new_settings = Settings(start_list=request.POST.getlist('start_list'),
+				                             key_words=request.POST['key_words'].split(),
+				                             labels=request.POST.getlist('labels'),
+				                             executors=request.POST.getlist('executors'),
+				                             due_date=due_date,
+				                             from_date=from_date,
+				                             to_date=to_date,
+				                             attachment=request.POST.get('attachment', False),
+				                             comments=request.POST.get('comments', False))
+		new_settings.generate_statistic(board['boardName'])
+		return redirect('download_page_url') # страница загрузки PDF
 
 
 class Download(View):

@@ -52,24 +52,8 @@ class SettingsForm(forms.Form):
     to_date = None
     due_date = None
 
-    def __init__(self, lists=(), labels=(), members=(), *args, **kwargs):
+    def __init__(self, lists=[], labels=[], members=[], *args, **kwargs):
         super(SettingsForm, self).__init__(*args, **kwargs)
         self.fields['start_list'].choices = lists
         self.fields['labels'].choices = labels
         self.fields['executors'].choices = members
-
-
-    def save(self, due_date, from_date, to_date):
-        self.from_date = from_date
-        self.to_date = to_date
-        self.due_date = due_date
-        new_settings = Settings(start_list=self.cleaned_data['start_list'],
-                                key_words=self.cleaned_data['key_words'].split(),
-                                labels=self.cleaned_data['labels'],
-                                executors=self.cleaned_data['executors'],
-                                due_date=due_date,
-                                from_date=from_date,
-                                to_date=to_date,
-                                attachment=self.cleaned_data['attachment'],
-                                comments=self.cleaned_data['comments'])
-        return new_settings
