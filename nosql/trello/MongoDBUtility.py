@@ -155,15 +155,14 @@ def getCardsNCreatedInList(collection, list_,
 		Date1 = minDate, Date2 = maxDate):
 	stages = [];
 	stages.extend(getCardsCreatedInListStage(list_, Date1, Date2));
-	# stages.append({"$count": "count"});
+	stages.append({"$count": "count"});
 
 	cards = collection.aggregate(stages);
-	pprint(list(cards));
+	# pprint(list(cards));
 	if (cards.alive == False):
 		number = 0;
 	else:
 		number = cards.next()['count'];
-
 	return number;
 
 # Returns cards that were put in list "toList" between "Date1" and "Date2" and were left in that list until Date2
