@@ -158,7 +158,7 @@ def getCardsNCreatedInList(collection, list_,
 	# stages.append({"$count": "count"});
 
 	cards = collection.aggregate(stages);
-	# pprint(list(cards));
+	pprint(list(cards));
 	if (cards.alive == False):
 		number = 0;
 	else:
