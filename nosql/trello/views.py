@@ -10,7 +10,8 @@ import os
 
 from .APIKey import apiKey
 from .TrelloUtility import TrelloUtility
-from .TrelloToMongoAdapter import TrelloToMongoAdapter
+from .TrelloToMongoAdapter import TrelloToMongoAdapter, getDB
+from .MongoDBUtility import getLists, getLabels, getMembers
 
 from .forms import SettingsForm, BoardForm
 
@@ -70,7 +71,23 @@ class SettingsGet(View):
 			collection = TrelloToMongoAdapter(boardId, apiKey, tokenKey)
 			trello = TrelloUtility(apiKey, tokenKey)
 			elems = trello.getBoardLists(boardId)
-			form = SettingsForm()
+			# ---------------------
+			db = getDB()
+			lists = []
+			labels = []
+			members = []
+			tmp = getLists(db)
+			for d in tmp:
+				lists.append((d['name'], d['name']))
+			tmp = getLabels(db)
+			for d in tmp:
+				labels.append(("{color}${name}".format(color=d['color'], name=d['name']),
+									"{color} ({name})".format(color=d['color'], name=d['name'])))
+			tmp = getMembers(db)
+			for d in tmp:
+				members.append(("{fullName}".format(fullName=d['fullName']),
+									 "{fullName} ({username})".format(fullName=d['fullName'], username=d['username'])))
+			form = SettingsForm(lists=lists, labels=labels, members=members)
 			return render(request, 'trello/settings_page.html', context={'form': form, 'date_error': date_error})
 		else:
 			return HttpResponseNotFound()

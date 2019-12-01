@@ -32,33 +32,17 @@ class BoardForm(forms.Form):
         return {'boardID': self.boardID, 'boardName': self.boardName}
 
 
-class ToLists:
-    def __init__(self):
-        db = getDB()
-        self.Lists = []
-        self.Labels = []
-        self.Members = []
-        tmp = getLists(db)
-        for d in tmp:
-            self.Lists.append((d['name'], d['name']))
-        tmp = getLabels(db)
-        for d in tmp:
-            self.Labels.append(("{color}${name}".format(color=d['color'], name=d['name']),
-                               "{color} ({name})".format(color=d['color'], name=d['name'])))
-        tmp = getMembers(db)
-        for d in tmp:
-            self.Members.append(("{fullName}".format(fullName=d['fullName']),
-                                "{fullName} ({username})".format(fullName=d['fullName'], username=d['username'])))
-
 class SettingsForm(forms.Form):
-    lists = ToLists()
-    start_list = forms.TypedMultipleChoiceField(choices=lists.Lists)
+    # start_list = forms.TypedMultipleChoiceField(choices=lists.Lists)
+    start_list = forms.TypedMultipleChoiceField()
     start_list.widget.attrs.update({'class': 'custom-select my-1 mr-2'})
     key_words = forms.CharField(required=False)
     key_words.widget.attrs.update({'class': 'form-control'})
-    labels = forms.TypedMultipleChoiceField(choices=lists.Labels)
+    # labels = forms.TypedMultipleChoiceField(choices=lists.Labels)
+    labels = forms.TypedMultipleChoiceField()
     labels.widget.attrs.update({'class': 'custom-select my-1 mr-2'})
-    executors = forms.TypedMultipleChoiceField(choices=lists.Members)
+    # executors = forms.TypedMultipleChoiceField(choices=lists.Members)
+    executors = forms.TypedMultipleChoiceField()
     executors.widget.attrs.update({'class': 'custom-select my-1 mr-2'})
     attachment = forms.BooleanField(required=False)
     attachment.widget.attrs.update({'class': 'form-check-input'})
@@ -67,6 +51,12 @@ class SettingsForm(forms.Form):
     from_date = None
     to_date = None
     due_date = None
+
+    def __init__(self, lists=(), labels=(), members=(), *args, **kwargs):
+        super(SettingsForm, self).__init__(*args, **kwargs)
+        self.fields['start_list'].choices = lists
+        self.fields['labels'].choices = labels
+        self.fields['executors'].choices = members
 
 
     def save(self, due_date, from_date, to_date):
