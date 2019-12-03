@@ -10,6 +10,10 @@ from .MongoDBUtility import getLists, getLabels, getMembers
 from .APIKey import apiKey
 
 
+class FileForm(forms.Form):
+    file = forms.FileField()
+
+
 class BoardForm(forms.Form):
     link = forms.URLField()
     link.widget.attrs.update({'class': 'form-control'})

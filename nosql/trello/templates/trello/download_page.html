@@ -10,5 +10,14 @@
                 Скачать статистику
             </button>
         </div>
+    </form>
+    <form class="" action="{% url 'export_page_url' %}" method="post">
+        {% csrf_token %}
+
+        <div class="col-5 offset-3">
+            <button type="submit" class="btn container-fluid text-white" style="background-color: #007ac0">
+                Выгрузить БД
+            </button>
+        </div>
      </form>
 {% endblock %}

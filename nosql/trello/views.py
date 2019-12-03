@@ -13,13 +13,15 @@ from .TrelloUtility import TrelloUtility
 from .TrelloToMongoAdapter import TrelloToMongoAdapter, getDB
 from .MongoDBUtility import getLists, getLabels, getMembers
 
-from .forms import SettingsForm, BoardForm
+from .forms import SettingsForm, BoardForm, FileForm
 from .models import Settings
 
 
 board = None # название доски и ID в словаре
 tokenKey = ""
 date_error = False
+from_file = False
+
 
 class KeyGet(View):
 	def get(self, request):
@@ -38,7 +40,7 @@ class Next(View):
 
 	def post(self, request):
 		if(request.POST['token'] != ''):
-			print(request.POST['token'])
+			# print(request.POST['token'])
 			global tokenKey
 			tokenKey = request.POST['token']
 			return redirect('boards_page_url')
@@ -51,47 +53,56 @@ class BoardGet(View):
 		if tokenKey:
 			form = BoardForm()
 			form.tokenKey = tokenKey
-			return render(request, 'trello/boards_page.html', context={'form': form})
+			return render(request, 'trello/boards_page.html', context={'form': form, 'file_form': FileForm()})
 		else:
 			return HttpResponseNotFound()
 
 	def post(self, request):
+		global from_file
+		from_file = False
+
 		bound_form = BoardForm(request.POST)
 		if bound_form.is_valid():
 			global board
 			board = bound_form.save()
 			return redirect('settings_page_url')
-		return render(request, 'trello/boards_page.html', context={'form': bound_form})
+		return render(request, 'trello/boards_page.html', context={'form': bound_form, 'file_form': FileForm()})
 
 
 class SettingsGet(View):
 	def get(self, request):
 		if apiKey:
-			# boardId = 'VoCJJodK'
-			boardId =  board['boardID']
-			collection = TrelloToMongoAdapter(boardId, apiKey, tokenKey)
-			trello = TrelloUtility(apiKey, tokenKey)
-			elems = trello.getBoardLists(boardId)
-			# ---------------------
-			db = getDB()
-			lists = []
-			labels = []
-			members = []
-			tmp = getLists(db)
-			for d in tmp:
-				lists.append((d['name'], d['name']))
-			tmp = getLabels(db)
-			for d in tmp:
-				labels.append(("{color}${name}".format(color=d['color'], name=d['name']),
-									"{color} ({name})".format(color=d['color'], name=d['name'])))
-			tmp = getMembers(db)
-			for d in tmp:
-				members.append(("{fullName}".format(fullName=d['fullName']),
-									 "{fullName} ({username})".format(fullName=d['fullName'], username=d['username'])))
-			form = SettingsForm(lists=lists, labels=labels, members=members)
-			return render(request, 'trello/settings_page.html', context={'form': form, 'date_error': date_error})
+			if not from_file:
+				# boardId = 'VoCJJodK'
+				boardId =  board['boardID']
+				collection = TrelloToMongoAdapter(boardId, apiKey, tokenKey)
+				trello = TrelloUtility(apiKey, tokenKey)
+				elems = trello.getBoardLists(boardId)
+				# ---------------------
+				db = getDB()
+				lists = []
+				labels = []
+				members = []
+				tmp = getLists(db)
+				for d in tmp:
+					lists.append((d['name'], d['name']))
+				tmp = getLabels(db)
+				for d in tmp:
+					labels.append(("{color}${name}".format(color=d['color'], name=d['name']),
+										"{color} ({name})".format(color=d['color'], name=d['name'])))
+				tmp = getMembers(db)
+				for d in tmp:
+					members.append(("{fullName}".format(fullName=d['fullName']),
+										 "{fullName} ({username})".format(fullName=d['fullName'], username=d['username'])))
+				form = SettingsForm(lists=lists, labels=labels, members=members)
+				return render(request, 'trello/settings_page.html', context={'form': form, 'date_error': date_error})
+
+			else: # из файла
+				pass
+
 		else:
 			return HttpResponseNotFound()
+
 
 
 	def post(self, request):
@@ -138,4 +149,44 @@ class Download(View):
 		response['Content-Length'] = str(os.stat(excel_file_name).st_size)
 		response['Content-Disposition'] = "attachment; filename=Statistic.pdf"
 
+		return response
+
+
+class Import(View):
+	def get(self, request):
+		return redirect('boards_page_url')
+
+	def post(self, request):
+		print("FILE!")
+		print(request.FILES)
+		form = FileForm(request.POST, request.FILES)
+		if form.is_valid():
+			global from_file
+			from_file = True
+			print("FILE!")
+			print(request.FILES)
+			f = request.FILES['file']
+			with open('./trello/JSON/import.txt', 'wb+') as destination:
+				for chunk in f.chunks():
+					destination.write(chunk)
+		# загрузка данных файла в БД
+		return redirect('settings_page_url')
+
+
+class Export(View):
+	def get(self, request):
+		return redirect('download_page_url')
+
+	def post(self, request):
+		# выгрузить статистику из БД
+		excel_file_name = './trello/JSON/export.txt'
+		fp = open(excel_file_name, "rb")
+		response = HttpResponse(fp.read())
+		fp.close()
+		file_type = mimetypes.guess_type(excel_file_name)
+		if file_type is None:
+			file_type = 'application/octet-stream'
+		response['Content-Type'] = file_type
+		response['Content-Length'] = str(os.stat(excel_file_name).st_size)
+		response['Content-Disposition'] = "attachment; filename=export.txt"
 		return response

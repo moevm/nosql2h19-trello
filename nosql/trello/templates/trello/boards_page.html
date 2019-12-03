@@ -21,4 +21,20 @@
             </button>
         </div>
      </form>
+    <label class="col-form-label offset-5">ИЛИ</label>
+    <form class="" action="{% url 'import_page_url' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="form-group row">
+            <label class="col-3 col-form-label">Данные в JSON:</label>
+            <div class="col-8">
+                {{ file_form.file }}
+            </div>
+        </div>
+        <div class="col-5 offset-3">
+            <button type="submit" class="btn container-fluid text-white" style="background-color: #007ac0">
+                Загрузить
+            </button>
+        </div>
+     </form>
 {% endblock %}

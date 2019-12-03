@@ -79,7 +79,6 @@ class Settings:
                 names.append("{color} ({name})".format(color=l_color, name=l_name))
                 values.append(getLabelNInList(collection, l_name, l_color, list_name))
             fig, ax = plt.subplots()
-            print(names, values)
             ax.bar(names, values)
             ax.set_title('Количество меток каждого вида в списке')
             ax.set_xlabel('цвет, название метки')
@@ -172,7 +171,6 @@ class Settings:
 
             self.write_in_pdf(pdf=pdf, txt="Статистика по исполнителям", font_size=12, tab=False)
             g_values = []
-            g_names = []
             for member in self.executors:
                 self.write_in_pdf(pdf=pdf, txt="Исполнитель: {}".format(member))
                 self.write_in_pdf(pdf=pdf, txt="Количество выполненных задач за период с {from_date} по {to_date}: {N}".format(
@@ -194,15 +192,15 @@ class Settings:
                     else:
                         values.append(0)
                     curr_date += timedelta(1)
-                g_names.append(names)
                 g_values.append(values)
                 fig, ax = plt.subplots()
                 ax.plot(names, values)
-                if(len(names)>5):
-                    ax.xaxis.set_major_locator(MultipleLocator(len(names) // 5))
+
                 ax.set_title('График зависимости количества выполненных исполнителем\n задач от даты')
                 ax.set_xlabel('Дата')
                 ax.set_ylabel('Количество выполненных задач, шт')
+                if (len(names) > 5):
+                    ax.xaxis.set_major_locator(MultipleLocator(len(names) // 5))
                 plt.savefig(statistic_path+'Statistic5.png')
                 self.add_image_in_pdf(pdf=pdf, image_path=statistic_path+'Statistic5.png')
 
@@ -212,7 +210,10 @@ class Settings:
                 ax.set_xlabel('Дата')
                 ax.set_ylabel('Количество выполненных задач, шт')
                 for i in range(len(self.executors)):
-                    ax.plot(g_names[i], g_values[i], label=self.executors[i])
+                    ax.plot(names, g_values[i], label=self.executors[i])
+                ax.legend()
+                if (len(names) > 5):
+                    ax.xaxis.set_major_locator(MultipleLocator(len(names) // 5))
                 plt.savefig(statistic_path + 'Statistic5_1.png')
                 self.add_image_in_pdf(pdf=pdf, image_path=statistic_path + 'Statistic5_1.png')
 
