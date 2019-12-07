@@ -27,7 +27,9 @@ class KeyGet(View):
 	def get(self, request):
 		global tokenKey
 		tokenKey = ""
-		return render(request, 'trello/start_page.html', context={})
+		global from_file
+		from_file = False
+		return render(request, 'trello/start_page.html', context={'file_form': FileForm()})
 
 	def post(self, request):
 		return redirect('https://trello.com/1/authorize?callback_method=fragment&return_url={return_url}&expiration=1day&name=TrelloStatistic&scope=read&response_type=token&key={YourAPIKey}'.format(
@@ -40,7 +42,6 @@ class Next(View):
 
 	def post(self, request):
 		if(request.POST['token'] != ''):
-			# print(request.POST['token'])
 			global tokenKey
 			tokenKey = request.POST['token']
 			return redirect('boards_page_url')
@@ -53,57 +54,48 @@ class BoardGet(View):
 		if tokenKey:
 			form = BoardForm()
 			form.tokenKey = tokenKey
-			return render(request, 'trello/boards_page.html', context={'form': form, 'file_form': FileForm()})
+			return render(request, 'trello/boards_page.html', context={'form': form})
 		else:
 			return HttpResponseNotFound()
 
 	def post(self, request):
-		global from_file
-		from_file = False
-
 		bound_form = BoardForm(request.POST)
 		if bound_form.is_valid():
 			global board
 			board = bound_form.save()
 			return redirect('settings_page_url')
-		return render(request, 'trello/boards_page.html', context={'form': bound_form, 'file_form': FileForm()})
+		return render(request, 'trello/boards_page.html', context={'form': bound_form})
 
 
 class SettingsGet(View):
 	def get(self, request):
-		if apiKey:
-			if not from_file:
-				# boardId = 'VoCJJodK'
+		if apiKey or from_file:
+			if apiKey:
 				boardId =  board['boardID']
 				collection = TrelloToMongoAdapter(boardId, apiKey, tokenKey)
 				trello = TrelloUtility(apiKey, tokenKey)
 				elems = trello.getBoardLists(boardId)
 				# ---------------------
-				db = getDB()
-				lists = []
-				labels = []
-				members = []
-				tmp = getLists(db)
-				for d in tmp:
-					lists.append((d['name'], d['name']))
-				tmp = getLabels(db)
-				for d in tmp:
-					labels.append(("{color}${name}".format(color=d['color'], name=d['name']),
-										"{color} ({name})".format(color=d['color'], name=d['name'])))
-				tmp = getMembers(db)
-				for d in tmp:
-					members.append(("{fullName}".format(fullName=d['fullName']),
-										 "{fullName} ({username})".format(fullName=d['fullName'], username=d['username'])))
-				form = SettingsForm(lists=lists, labels=labels, members=members)
-				return render(request, 'trello/settings_page.html', context={'form': form, 'date_error': date_error})
-
-			else: # из файла
-				pass
+			db = getDB()
+			lists = []
+			labels = []
+			members = []
+			tmp = getLists(db)
+			for d in tmp:
+				lists.append((d['name'], d['name']))
+			tmp = getLabels(db)
+			for d in tmp:
+				labels.append(("{color}${name}".format(color=d['color'], name=d['name']),
+									"{color} ({name})".format(color=d['color'], name=d['name'])))
+			tmp = getMembers(db)
+			for d in tmp:
+				members.append(("{fullName}".format(fullName=d['fullName']),
+									 "{fullName} ({username})".format(fullName=d['fullName'], username=d['username'])))
+			form = SettingsForm(lists=lists, labels=labels, members=members)
+			return render(request, 'trello/settings_page.html', context={'form': form, 'date_error': date_error})
 
 		else:
 			return HttpResponseNotFound()
-
-
 
 	def post(self, request):
 		bound_form = SettingsForm(request.POST)
@@ -130,14 +122,12 @@ class SettingsGet(View):
 
 class Download(View):
 	def get(self, request):
-		if apiKey:
+		if apiKey or from_file:
 			return render(request, 'trello/download_page.html', context={})
 		else:
 			return HttpResponseNotFound()
 
 	def post(self, request):
-		global tokenKey
-		tokenKey = ""
 		excel_file_name = './trello/statistic/Statistic.pdf'
 		fp = open(excel_file_name, "rb")
 		response = HttpResponse(fp.read())
@@ -154,7 +144,7 @@ class Download(View):
 
 class Import(View):
 	def get(self, request):
-		return redirect('boards_page_url')
+		return redirect('start_page_url')
 
 	def post(self, request):
 		print("FILE!")
@@ -181,7 +171,7 @@ class Export(View):
 	def post(self, request):
 		# выгрузить статистику из БД
 		excel_file_name = './trello/JSON/export.txt'
-		saveDBToFile(getDB(), excel_file_name);
+		saveDBToFile(getDB(), excel_file_name)
 		fp = open(excel_file_name, "rb")
 		response = HttpResponse(fp.read())
 		fp.close()
