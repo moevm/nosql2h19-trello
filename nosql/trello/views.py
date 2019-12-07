@@ -116,15 +116,16 @@ class SettingsGet(View):
 				                             to_date=to_date,
 				                             attachment=request.POST.get('attachment', False),
 				                             comments=request.POST.get('comments', False))
-		boardName = "";
+		boardName = ""
 		if tokenKey:
-			new_settings.generate_statistic(board['boardName'])
+			boardName=board['boardName']
+		new_settings.generate_statistic(boardName)
 		return redirect('download_page_url') # страница загрузки PDF
 
 
 class Download(View):
 	def get(self, request):
-		if apiKey or from_file:
+		if tokenKey or from_file:
 			return render(request, 'trello/download_page.html', context={})
 		else:
 			return HttpResponseNotFound()
