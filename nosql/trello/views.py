@@ -166,6 +166,9 @@ class Import(View):
 			print("FILE!")
 			print(request.FILES)
 			f = request.FILES['file']
+			with open('./trello/JSON/import.txt', 'wb+') as destination:
+				for chunk in f.chunks():
+					destination.write(chunk)
 			loadDBFromFile(getDB(), './trello/JSON/import.txt')
 		# загрузка данных файла в БД
 		return redirect('settings_page_url')
@@ -178,7 +181,7 @@ class Export(View):
 	def post(self, request):
 		# выгрузить статистику из БД
 		excel_file_name = './trello/JSON/export.txt'
-		saveDBToFile(getDB(), excel_file_name)
+		saveDBToFile(getDB(), excel_file_name);
 		fp = open(excel_file_name, "rb")
 		response = HttpResponse(fp.read())
 		fp.close()
