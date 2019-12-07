@@ -15,23 +15,23 @@ def TrelloToMongoAdapter(boardId, apiKey, tokenKey):
 	db = client.db;
 
 
-	collection = db.cardsCollection;
+	collection = db.TrelloStats_cards;
 	collection.remove();
 
 	# Adding collections for members, lists and ?labels?
-	membersCollection = db.members;
+	membersCollection = db.TrelloStats_members;
 	membersCollection.remove();
 	boardMembers = trello.getBoardMembers(boardId, fields="");
 	for i in boardMembers:
 		i['_id'] = i.pop('id');
 	membersCollection.insert_many(boardMembers);
-	listsCollection = db.lists;
+	listsCollection = db.TrelloStats_lists;
 	listsCollection.remove();
 	lists = trello.getBoardLists(boardId, fields="name");
 	for i in lists:
 		i['_id'] = i.pop('id');
 	listsCollection.insert_many(lists);
-	labelsCollection = db.labels;
+	labelsCollection = db.TrelloStats_labels;
 	labelsCollection.remove();
 	labels = trello.getBoardLabels(boardId, fields="name,color");
 	for i in labels:
@@ -150,5 +150,5 @@ def getDB():
 def getCollection():
 	client = MongoClient();
 	db = client.db;
-	collection = db.cardsCollection;
+	collection = db.TrelloStats_cardsCollection;
 	return collection;

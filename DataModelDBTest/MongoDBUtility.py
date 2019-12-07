@@ -1,7 +1,52 @@
 from datetime import datetime, MINYEAR, MAXYEAR
 from pprint import pprint
+from bson import json_util;
+
 minDate = datetime(MINYEAR, 1, 1);
 maxDate = datetime(MAXYEAR, 12, 31);
+
+def saveDBToFile(db, fileName, collections = ['TrelloStats_members', 'TrelloStats_labels', 'TrelloStats_lists', 'TrelloStats_cards']):
+	with open(fileName, 'w') as f:
+		for collection in collections:
+			if not(collection in db.list_collection_names()):
+				print("Warning: No \'" + collection + "\' collection in database!");
+				continue;
+
+			# Write collection name
+			f.write(collection+'\n');
+
+			# Write documents in collection
+			data = db[collection].find();
+			for it in data:
+				f.write(json_util.dumps(it)+'\n');
+
+def loadDBFromFile(db, fileName):
+	clearDB(db);
+	with open(fileName, 'r') as f:
+		collName = "";
+		# For each line in file
+		for i, line in enumerate(f):
+			line = line.strip(); # Detele newline character
+			try:
+				# Deserialize from json
+				obj = json_util.loads(line);
+				db[collName].insert_one(obj);
+			except ValueError:
+				# If string is not JSON, then it's probably collection name.
+				collName = line;
+
+def clearDB(db, collections = ['TrelloStats_members', 'TrelloStats_labels', 'TrelloStats_lists', 'TrelloStats_cards']):
+	for it in collections:
+		db[it].remove();
+
+# def saveCollInFile(coll, fileName):
+# 	data = coll.find();
+# 	with open(fileName, 'w') as f:
+# 		json.dump(data, f);
+#
+# def loadCollFromFile(coll, fileName):
+# 	with open(fileName, 'r') as f:
+# 		json.load(f);
 
 def getCardsCreatedInListStage(list_, Date1 = minDate, Date2 = maxDate):
 	return [
@@ -53,16 +98,20 @@ def getCardsMovedToListStage(toList, Date1 = minDate, Date2 = maxDate):
 
 
 def getMembers(db):
-	coll = db.members;
+	coll = db.TrelloStats_members;
 	return list(coll.find());
 
 def getLabels(db):
-	coll = db.labels;
+	coll = db.TrelloStats_labels;
 	return list(coll.find());
 
 def getLists(db):
-	coll = db.lists;
+	coll = db.TrelloStats_lists;
 	return list(coll.find());
+
+def getCards(db):
+	coll = db.TrelloStats_cards;
+	return coll.find();
 
 ### Paper1
 def getCardsNInListName(collection, list):

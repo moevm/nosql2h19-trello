@@ -1,8 +1,8 @@
 # from pymongo import MongoClient;
 from datetime import datetime, timezone, timedelta;
 from pprint import pprint # Pretty printing
-import json;
-
+# import json;
+# from bson import json_util;
 # from bson.json_util import dumps
 
 # Keys from trello, should be kept in private:
@@ -33,33 +33,32 @@ def testTestBoard():
 	db = getDB();
 	collection = getCollection();
 	# pprint(getLabels(db));
-	pprint(getLabelNInList(collection, "test", "sky", "BCD"));
-	pprint(getLabelN(collection, "test", "sky"));
+	# pprint(getLabelNInList(collection, "test", "sky", "BCD"));
+	# pprint(getLabelN(collection, "test", "sky"));
+	#
+	# Date3 = datetime(2019,11,19);
+	# Date4 = datetime(2019,11,21);
+	# listName = "Work In Progress"
+	# member = "Jordan Womack"
 
-	Date3 = datetime(2019,11,19);
-	Date4 = datetime(2019,11,21);
-	listName = "Work In Progress"
-	member = "Jordan Womack"
-
-	# print("Lists:");
-	# pprint(getLists(db));
-	# print("Labels:");
-	labels = getLabels(db);
+	# clearDB(db);
+	print("Lists:");
+	pprint(getLists(db));
+	print("Labels:");
 	pprint(getLabels(db));
-	# print("Members:");
-	# pprint(getMembers(db));
-	members = db.members.find();
-	pprint(list(db.members.find()));
-	pprint(members);
-	# pprint(dumps(members))
+	print("Members:");
+	pprint(getMembers(db));
 
 	print("Serialization test:");
-	with open('out.json', 'w') as f:
-		json.dump(labels, f);
+	saveDBToFile(db, 'out.json');
+	loadDBFromFile(db, 'out.json');
 
-	with open('out.json', 'r') as f:
-		print("Read input:");
-		pprint(json.load(f));
+	print("Lists:");
+	pprint(getLists(db));
+	print("Labels:");
+	pprint(getLabels(db));
+	print("Members:");
+	pprint(getMembers(db));
 
 	# print("#### Paper1 stats ####");
 	# print("List name is known from input");
