@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-from TrelloUtility import TrelloUtility
+from .TrelloUtility import TrelloUtility
 from bson.objectid import ObjectId;
 from json import dumps;
 from datetime import datetime;
