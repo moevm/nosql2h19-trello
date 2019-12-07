@@ -150,5 +150,5 @@ def getDB():
 def getCollection():
 	client = MongoClient();
 	db = client.db;
-	collection = db.TrelloStats_cardsCollection;
+	collection = db.TrelloStats_cards;
 	return collection;
