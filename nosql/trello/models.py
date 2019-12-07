@@ -61,7 +61,6 @@ class Settings:
         pdf = FPDF(orientation='P', unit='mm', format='A4')
         pdf.add_font('DejaVu', '', 'DejaVuSansCondensed.ttf', uni=True)
 
-
         for list_name in self.start_list: # цикл по каждому выбранному списку
             pdf.add_page()
             pdf.set_font('DejaVu', '', 16)
@@ -84,6 +83,7 @@ class Settings:
             ax.set_xlabel('цвет, название метки')
             ax.set_ylabel('количество меток, шт')
             plt.savefig(statistic_path+'Statistic1.png')
+            fig.clf()
             self.add_image_in_pdf(pdf=pdf, image_path=statistic_path+'Statistic1.png')
 
 
@@ -127,6 +127,7 @@ class Settings:
             ax.set_xlabel('Дата')
             ax.set_ylabel('Количество карточек, шт')
             plt.savefig(statistic_path+'Statistic2.png')
+            fig.clf()
             self.add_image_in_pdf(pdf=pdf, image_path=statistic_path + 'Statistic2.png')
 
             # статистика перемещений карточек в список по дням недели
@@ -145,6 +146,7 @@ class Settings:
             ax.set_xlabel('День недели')
             ax.set_ylabel('Количество карточек, шт')
             plt.savefig(statistic_path+'Statistic3.png')
+            fig.clf()
             self.add_image_in_pdf(pdf=pdf, image_path=statistic_path + 'Statistic3.png')
 
             # ключевые слова ищутся по всей доске или в текущем списке?
@@ -161,6 +163,7 @@ class Settings:
                 ax.set_xlabel('Ключевое слово')
                 ax.set_ylabel('Количество карточек, шт')
                 plt.savefig(statistic_path+'Statistic4.png')
+                fig.clf()
                 self.add_image_in_pdf(pdf=pdf, image_path=statistic_path + 'Statistic4.png')
 
             self.write_in_pdf(pdf=pdf, txt="Cтатистика по срокам выполнения", font_size=12, tab=False)
@@ -195,13 +198,13 @@ class Settings:
                 g_values.append(values)
                 fig, ax = plt.subplots()
                 ax.plot(names, values)
-
                 ax.set_title('График зависимости количества выполненных исполнителем\n задач от даты')
                 ax.set_xlabel('Дата')
                 ax.set_ylabel('Количество выполненных задач, шт')
                 if (len(names) > 5):
                     ax.xaxis.set_major_locator(MultipleLocator(len(names) // 5))
                 plt.savefig(statistic_path+'Statistic5.png')
+                fig.clf()
                 self.add_image_in_pdf(pdf=pdf, image_path=statistic_path+'Statistic5.png')
 
             if len(self.executors) > 1:
@@ -215,6 +218,7 @@ class Settings:
                 if (len(names) > 5):
                     ax.xaxis.set_major_locator(MultipleLocator(len(names) // 5))
                 plt.savefig(statistic_path + 'Statistic5_1.png')
+                fig.clf()
                 self.add_image_in_pdf(pdf=pdf, image_path=statistic_path + 'Statistic5_1.png')
 
             if(self.attachment):
@@ -228,13 +232,13 @@ class Settings:
                 for member in self.executors:
                     names.append(member)
                     values.append(getAttachmentsNDoneInListByUser(collection, list_name, member))
-                # поработать над надписями и цветом
                 fig, ax = plt.subplots()
                 ax.set_title('Количество добавленных вложений каждым пользователем')
                 ax.set_xlabel('Пользователь')
                 ax.set_ylabel('Количество добавленных вложений, шт')
                 ax.bar(names, values)
                 plt.savefig(statistic_path+'Statistic6.png')
+                fig.clf()
                 self.add_image_in_pdf(pdf=pdf, image_path=statistic_path+'Statistic6.png')
 
             if(self.comments):
@@ -256,6 +260,7 @@ class Settings:
                 ax.set_xlabel('Дата')
                 ax.set_ylabel('Количество комментариев, шт')
                 plt.savefig(statistic_path+'Statistic7.png')
+                fig.clf()
                 self.add_image_in_pdf(pdf=pdf, image_path=statistic_path+'Statistic7.png')
 
 
