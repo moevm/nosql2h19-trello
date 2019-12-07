@@ -70,7 +70,7 @@ class BoardGet(View):
 class SettingsGet(View):
 	def get(self, request):
 		if apiKey or from_file:
-			if apiKey:
+			if tokenKey:
 				boardId =  board['boardID']
 				collection = TrelloToMongoAdapter(boardId, apiKey, tokenKey)
 				trello = TrelloUtility(apiKey, tokenKey)
@@ -116,7 +116,9 @@ class SettingsGet(View):
 				                             to_date=to_date,
 				                             attachment=request.POST.get('attachment', False),
 				                             comments=request.POST.get('comments', False))
-		new_settings.generate_statistic(board['boardName'])
+		boardName = "";
+		if tokenKey:
+			new_settings.generate_statistic(board['boardName'])
 		return redirect('download_page_url') # страница загрузки PDF
 
 
