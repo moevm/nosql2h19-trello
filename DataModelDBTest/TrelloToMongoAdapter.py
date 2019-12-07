@@ -50,10 +50,10 @@ def TrelloToMongoAdapter(boardId, apiKey, tokenKey):
 			# creationDate = trello.getCardCreationDate(cardId);
 			# print(creationDate);
 			# break;
-			print("   Get card info:");
+			# print("   Get card info:");
 			[cardMembers, cardMoves, cardLabels, cardComments, cardAttachments] = trello.getCardSubInfo(cardId);
 			# For each member
-			print("   Members:");
+			# print("   Members:");
 			members = [];
 			for member in cardMembers:
 				members.append({
@@ -63,7 +63,7 @@ def TrelloToMongoAdapter(boardId, apiKey, tokenKey):
 				})
 			# For each move
 			moves = [];
-			print("   Moves:");
+			# print("   Moves:");
 			for move in cardMoves:
 				memberDoc = None; # Some comments don't have authors? Deleted accounts?
 				if ('memberCreator' in move):
@@ -81,7 +81,7 @@ def TrelloToMongoAdapter(boardId, apiKey, tokenKey):
 				});
 
 			# For each label
-			print("   Labels:");
+			# print("   Labels:");
 			labels = [];
 			for label in cardLabels:
 				labels.append({
@@ -91,7 +91,7 @@ def TrelloToMongoAdapter(boardId, apiKey, tokenKey):
 				});
 
 			# For each comment
-			print("   Comments:");
+			# print("   Comments:");
 			comments = [];
 			for comment in cardComments:
 				memberDoc = None; # Some comments don't have authors? Deleted accounts?
@@ -108,7 +108,7 @@ def TrelloToMongoAdapter(boardId, apiKey, tokenKey):
 				});
 			# print(comments);
 			# For each attachment
-			print("   Attachments:");
+			# print("   Attachments:");
 			attachments = [];
 			for attachment in cardAttachments:
 				# member = trello.getMember(attachment['idMember'], "fullName,username");
