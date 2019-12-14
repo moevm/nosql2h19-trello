@@ -6,7 +6,6 @@ import json
 
 # Keys from trello, should be kept in private:
 from .APIKey import apiKey
-from .tokenKey import tokenKey
 from .TrelloUtility import TrelloUtility
 from .TrelloToMongoAdapter import TrelloToMongoAdapter, getCollection, getDB
 from .MongoDBUtility import *

@@ -1,5 +1,4 @@
 # Delete file with trello API and token keys from git tracking
-**/APIKey.py
 **/tokenKey.py
 
 venv
